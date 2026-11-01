@@ -4,7 +4,7 @@
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
-![Version](https://img.shields.io/badge/version-0.1.0-lightgrey.svg)
+![Version](https://img.shields.io/badge/version-0.1.1-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -187,6 +187,31 @@ a new model appears. Change the reviewer's model ID in
 [`claude-code/agents/reviewer.md`](claude-code/agents/reviewer.md) in the
 same commit as the table, so the history shows which reviewer approved
 which change.
+
+### Releasing a change
+
+Claude Code caches each installed plugin by its version, so users only
+receive a change when the version goes up. For every change users should
+get:
+
+1. Raise `version` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json)
+   (patch for fixes, minor for new behaviour) and the badge at the top of
+   this file, in the same commit as the change or straight after it.
+2. Merge to `master` and push.
+
+### Updating an installed copy
+
+From a shell:
+
+```
+claude plugin marketplace update foreman
+claude plugin update foreman@foreman
+```
+
+Or run `/plugin` in Claude Code, refresh the foreman marketplace and
+update the plugin. Restart Claude Code afterwards. One update covers
+every project when the plugin is installed at user scope; a project
+scope install is updated from that project.
 
 ## Licence and credits
 
