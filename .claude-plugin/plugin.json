@@ -1,6 +1,6 @@
 {
   "name": "foreman",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "One task per branch, a model chosen by the task's level, and an independent review before merge.",
   "author": { "name": "Rocco Naudé", "url": "https://github.com/RoccoNaude" },
   "repository": "https://github.com/RoccoNaude/foreman",
