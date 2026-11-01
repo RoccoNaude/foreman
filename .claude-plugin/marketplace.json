@@ -1,0 +1,15 @@
+{
+  "name": "foreman",
+  "owner": {
+    "name": "Rocco Naudé",
+    "url": "https://github.com/RoccoNaude"
+  },
+  "description": "foreman: one task per branch, a model chosen by the task's level, and an independent review before merge.",
+  "plugins": [
+    {
+      "name": "foreman",
+      "description": "One task per branch, a model chosen by the task's level, and an independent review before merge.",
+      "source": "./"
+    }
+  ]
+}
