@@ -19,14 +19,18 @@ tracker, or a plan task such as `5.2` from the plan).
    main branch, checks, expected load, protected data and rules. If it
    is missing, stop and say so.
 2. Read the task's entry so you know what the change is meant to do.
-3. The branch is checked out and its changes are usually uncommitted.
-   See them with `git diff <main branch>` and `git status --short`, and
-   read every untracked file in full; `git log <main branch>..<branch>`
-   shows any commits. Read the changed files in full, plus their callers
-   and the tests that cover them. An empty change is a finding, not a
-   pass.
-4. Review with the `ponytail:ponytail-review` skill if the Skill tool can
-   run it. If not, apply these checks yourself and say so:
+3. The branch is checked out and its changes are usually uncommitted;
+   `git log <main branch>..<branch>` shows any commits. An empty change
+   is a finding, not a pass.
+4. Review with the `ponytail:ponytail-review` skill first, before reading
+   the change yourself, if the Skill tool can run it: tell it the branch,
+   the main branch, that the changes are uncommitted (new files are
+   untracked, so list them from `git status --short`), and the expected
+   load. It reads the diff, callers and tests; do not repeat that.
+   If it cannot run, review yourself and say so: see the changes with
+   `git diff <main branch>` and `git status --short`, read every
+   untracked file and changed file in full, plus their callers and the
+   tests that cover them, then apply these checks:
    - **Correct:** the logic does what it claims, edge cases included.
    - **Safe:** no data lost, exposed or written where it should not be;
      input checked where it crosses a trust boundary.
