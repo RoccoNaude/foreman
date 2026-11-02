@@ -9,8 +9,10 @@ now, it is a finding; if it does not exist yet, it is a plan task.
 ## How to use this file
 
 - **One file, stable IDs.** IDs are never reused or renumbered. A later
-  audit adds new findings with the next free ID, under its own dated
-  heading, and a row in the Audit log.
+  audit adds new findings with the next free ID to the matching list
+  under **Open findings**, each with a **Source** line, and a row in the
+  Audit log. There is one Must fix, Should fix and Nice to have list for
+  all audits and reviews; never a separate block per audit.
 - **To implement a finding**, run `/foreman:start-task F01`. It reads
   the finding, checks the model level, re-checks the code (line numbers
   drift; search by function name), makes the smallest fix with its test,
@@ -42,7 +44,8 @@ gets its Model line when it is added.
   findings are open; it would mostly repeat them.
 - **Each full audit** adds a row to the Audit log, re-checks every open
   finding (still holds, implemented, or no longer applies) and adds new
-  findings under a dated heading.
+  findings to the matching list under **Open findings**, each with a
+  **Source** line.
 
 ## Implemented
 
@@ -57,7 +60,7 @@ Fixes made from this tracker, newest first.
 |---|---|---|---|
 | <date> | <whole repo, N lines, N tests passing> | <expected load> | <N findings (F01 to Fnn)> |
 
-## Open findings: audit of <date>
+## Open findings
 
 Fix order: <which first, and why>.
 

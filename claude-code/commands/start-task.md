@@ -58,8 +58,9 @@ task.
    the review has Must fix findings: fix them on the branch, verify
    again, and run the reviewer once more; if that second review still
    has one, stop and hand it to me. Findings that can wait: add them to
-   the tracker as the next free ID, with a **Model** line and source
-   "review of <id>"; with no tracker, list them for me. Never add them
+   the tracker as the next free ID, in the matching list under **Open
+   findings** (never a new block per review), with a **Model** line and
+   source "review of <id>"; with no tracker, list them for me. Never add them
    to the plan.
 7. **Record.**
    - Finding: move it to the **Implemented** table (date, what changed,
