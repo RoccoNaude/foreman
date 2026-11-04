@@ -5,7 +5,7 @@ import foreman from "../.opencode/plugins/foreman.mjs"
 
 async function reviewer() {
   const agent = { model: { providerID: "cheap", id: "implementer" }, permissions: [] }
-  await foreman.setup({ session: { hook: async () => {} }, agent: { transform: async callback => callback({
+  await foreman.setup({ command: { transform: async () => {} }, session: { hook: async () => {} }, agent: { transform: async callback => callback({
     update(id, update) {
       assert.equal(id, "foreman-reviewer")
       update(agent)
@@ -34,6 +34,7 @@ test("reviewer replaces inherited model and privileges, and reload is repeatable
 test("dispatch guard blocks fallback models and variants, not other agents", async () => {
   let guard
   await foreman.setup({
+    command: { transform: async () => {} },
     skill: { list: async () => ({ data: [] }) },
     agent: { transform: async () => {} },
     session: { hook: async (kind, callback) => { assert.equal(kind, "context"); guard = callback } },
@@ -41,10 +42,10 @@ test("dispatch guard blocks fallback models and variants, not other agents", asy
   const model = { providerID: "openai", id: "gpt-6.1-sol", variant: "high" }
   const event = { agent: "foreman-reviewer", model, system: [] }
   await guard(event)
-  assert.match(event.system[0].text, /unavailable.*manual fallback/)
-  await guard({ agent: "build", model: {} })
+  assert.match(event.system[1].text, /unavailable.*manual fallback/)
+  await guard({ agent: "build", model: {}, system: [] })
   for (const override of [{ id: "gpt-6-luna" }, { providerID: "proxy" }, { variant: undefined }]) {
-    await assert.rejects(() => guard({ agent: "foreman-reviewer", model: { ...model, ...override } }),
+    await assert.rejects(() => guard({ agent: "foreman-reviewer", model: { ...model, ...override }, system: [] }),
       /requires openai\/gpt-6.1-sol#high.*Review blocked/)
   }
 })
