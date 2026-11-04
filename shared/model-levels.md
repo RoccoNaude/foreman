@@ -15,6 +15,10 @@ adds its own level A cases in its settings file (`.foreman.md`, section
   first started: if a task has none, `/foreman:start-task` asks you (it
   never estimates) and adds the tag. New plan tasks can get the tag when
   they are written.
+- **GitHub issues:** an optional standalone
+  `Model: A|B|C|Human (then X)` body line supplies the level; if absent,
+  start-task asks the owner without estimating or editing GitHub. See
+  [issue rules](github-issues.md).
 - **Pick the model before starting the session:** one from the task's
   level or a higher one. `/foreman:start-task` stops if the session
   model is below the level, not placed in the table, or on trial for

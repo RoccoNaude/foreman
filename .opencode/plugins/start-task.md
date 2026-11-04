@@ -1,4 +1,6 @@
-The first word of the task input is the task ID; anything after it is my notes.
+For `issue <number|#number|URL> [notes]`, read and follow
+`$SHARED/github-issues.md`; the complete reference precedes my notes.
+Otherwise the first word is the task ID; anything after it is my notes.
 Follow this workflow in order. Task notes do not waive its checks or approvals.
 
 0. **Read the settings.** Read `.foreman.md` at the repository root:
@@ -7,12 +9,16 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
    `$SHARED/templates/settings.md` there and fill it in.
    The model table is `$SHARED/model-levels.md`.
    - An ID like `F01` is a finding in the settings' **Tracker**; an ID
-     like `5.2` is a task in the settings' **Plan**. Any other shape, or
-     a file the settings mark `None`: stop and say so. An absent entry
+      like `5.2` is a task in the settings' **Plan**. `issue` uses the
+      shared GitHub rules instead; Tracker and Plan may both be `None`.
+      Any other shape: stop and say so. For local tasks, a file the
+      settings mark `None` also stops. An absent entry
      also stops; never invent a task.
 1. **Read the task and check the model.** Read only the task's entry,
    then do the model check before reading any code:
-   - Read the task's level: the finding's **Model** line, or the plan
+    - Issue: read its level using the shared GitHub rules, then apply the
+      same project overrides and actual-session model check below.
+    - Read a local task's level: the finding's **Model** line, or the plan
      task's `(model: X)` tag. A plan task with none: stop and ask me for
      a level (do not estimate); remember it and write the tag onto the
      task on the branch, after step 3. A missing or invalid finding
@@ -42,7 +48,8 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
    approve before writing code.
 3. **Branch.** `git status` must be clean on the settings' main branch.
    Create the branch `<id>-<short-kebab-name>` (e.g.
-   `f01-stock-walk-start`, `plan-5.2-stock-top-up`). Write a plan
+    `f01-stock-walk-start`, `plan-5.2-stock-top-up`, or for issues
+    `issue-42-import-failure`). Write a plan
    task's new model tag now.
 4. **Implement** the smallest complete change plus its test. Do nothing
    listed under the settings' **Ask first** unless the task needs it;
@@ -51,8 +58,9 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
 5. **Verify.** Run every command in the settings' **Checks**. Show the
    result; fix what fails.
 6. **Review.** Invoke the independent `foreman-reviewer` subagent with
-   the branch name and task ID, and say the changes are uncommitted
-   (including untracked files). Use OpenCode's subagent tool with
+    the branch name and task ID, and say the changes are uncommitted
+    (including untracked files). For issues, also supply the snapshot and
+    clarifications required by the shared GitHub rules. Use OpenCode's subagent tool with
    `agent: "foreman-reviewer"`; its registration pins
    `openai/gpt-6.1-sol#high` for every task level. Do not pass Claude
    Code's `effort` argument or override/inherit the implementation model.
@@ -67,6 +75,7 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
    new block per review), with a **Model** line and source "review of
    <id>"; with no tracker, list them for me. Never add them to the plan.
 7. **Record.**
+    - Issue: report locally as specified in the shared GitHub rules.
    - Finding: move it to the **Implemented** table (date, what changed,
      the guarding test) and delete its open entry.
    - Plan task: tick its checkbox with the date, matching the plan's
@@ -74,6 +83,7 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
    - If the settings name a **Notes file**, say what change to project
      status it should reflect; do not edit it.
 8. **Commit and merge.** Show the diff summary and proposed commit
-   message (`F01: <what changed>` or `Plan 5.2: <what changed>`). Ask
+    message (`F01: <what changed>`, `Plan 5.2: <what changed>` or
+    `Issue #42: <what changed>`; no automatic-closing text). Ask
    before committing, then ask separately before merging into the main
    branch and deleting the task branch. Never push.

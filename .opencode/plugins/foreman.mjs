@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-const system = readFileSync(new URL("./reviewer.md", import.meta.url), "utf8")
 const reviewerModel = { providerID: "openai", id: "gpt-6.1-sol", variant: "high" }
 const shared = fileURLToPath(new URL("../../shared", import.meta.url))
+const system = readFileSync(new URL("./reviewer.md", import.meta.url), "utf8")
+  .replaceAll("$SHARED", shared)
 const startTask = readFileSync(new URL("./start-task.md", import.meta.url), "utf8")
   .replaceAll("$SHARED", shared)
 const models = readFileSync(new URL("../../shared/model-levels.md", import.meta.url), "utf8")
@@ -14,7 +15,7 @@ export default {
     await ctx.command.transform(editor => {
       editor.add({
         name: "foreman/start-task",
-        description: "Start one plan task or finding; ask before code, commit and merge. Usage: <task ID> [notes]",
+        description: "Start one plan task, finding or GitHub issue; ask before code, commit and merge. Usage: <ID | issue number|#number|URL> [notes]",
         execute: async ({ sessionID, prompt, delivery }) => {
           await ctx.session.prompt({ ...prompt, sessionID, delivery,
             text: `${prompt.text}\n\n${startTask}` })
@@ -22,10 +23,10 @@ export default {
       })
       editor.add({
         name: "foreman/models",
-        description: "Show foreman's shared model table exactly as written",
+        description: "Show foreman's models per level (A, B, C) as a Markdown table",
         execute: async ({ sessionID, delivery }) => {
           await ctx.session.prompt({ sessionID, delivery,
-            text: `Show the following shared model table exactly as written. Do not summarise, change or add to it. Output only the table document below.\n\n${models}` })
+            text: `Output only the Markdown table under **Models per level** in the document below, preserving its headers and cell contents exactly, including model IDs and trial restrictions. Render it as a table, not a code block. Omit headings, dates, surrounding prose and all other sections.\n\n${models}` })
         },
       })
     })
