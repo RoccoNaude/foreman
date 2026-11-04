@@ -45,6 +45,7 @@ test("artifact contains unchanged shared sources and only intended runtime files
   check("shared")
   assert.ok(files.includes(".opencode/plugins/foreman.mjs"))
   assert.ok(files.includes(".opencode/plugins/reviewer.md"))
+  assert.ok(files.includes(".opencode/plugins/start-task.md"))
   assert.ok(files.includes(".opencode/plugins/index.js"))
   assert.ok(!files.some(path => /^(claude-code|\.claude-plugin|\.tmp|tests)\//.test(path)))
   assert.deepEqual(readdirSync(join(sandbox, "node_modules")), [".package-lock.json", "opencode-foreman"])
@@ -184,7 +185,9 @@ export default {
     do {
       const agents = await request("/api/agent")
       const plugins = await request("/api/plugin")
+      const commands = await request("/api/command")
       if (agents.filter(agent => agent.id === "foreman-test-reviewer").length === (expected ? 1 : 0)
+        && commands.filter(command => ["foreman/start-task", "foreman/models"].includes(command.name)).length === (expected ? 2 : 0)
         && agents.filter(agent => agent.id === "foreman-reviewer").length === (expected ? 1 : 0)
         && plugins.filter(plugin => plugin.id === "foreman" && plugin.state.status === "active").length === (expected ? 1 : 0)) return
       await new Promise(resolve => setTimeout(resolve, 100))

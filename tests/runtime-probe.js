@@ -1,7 +1,25 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 
 // Runs inside the isolated V2 server; no provider request is sent.
 export async function probe(ctx) {
+  const display = await ctx.session.create()
+  let displayDispatch = false
+  const stopDisplay = await ctx.session.hook("context", event => {
+    if (event.sessionID !== display.id) return
+    displayDispatch = true
+    throw new Error("Foreman test: stop display before provider dispatch")
+  })
+  try {
+    await ctx.session.command({ sessionID: display.id, name: "foreman/models", text: "" })
+    await ctx.session.wait({ sessionID: display.id })
+  } finally {
+    await stopDisplay.dispose()
+  }
+  assert.ok(displayDispatch)
+  const displayed = JSON.stringify(await ctx.session.context({ sessionID: display.id }))
+  const table = readFileSync(new URL("../shared/model-levels.md", import.meta.url), "utf8")
+  assert.ok(displayed.includes(JSON.stringify(table).slice(1, -1)), displayed)
   const parent = await ctx.session.create({
     model: { providerID: "openai", id: "gpt-6-luna" },
   })
