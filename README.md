@@ -4,8 +4,8 @@
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
-![Claude Code version](https://img.shields.io/badge/Claude_Code-0.2.2-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.1.0_private-lightgrey.svg)
+![Claude Code version](https://img.shields.io/badge/Claude_Code-0.2.3-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.1.1_private-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -106,8 +106,8 @@ by the model about to do it. The highest matching level wins.
 
 The full table, with OpenAI and local models, the reviewer settings and
 tested behaviour, is in [`shared/model-levels.md`](shared/model-levels.md).
-It ships with the plugin; to see the installed copy from any project,
-run:
+It ships with the plugin; to display only its models-per-level table from
+any project, run:
 
 ```
 /foreman:models

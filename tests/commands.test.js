@@ -34,13 +34,19 @@ test("commands register repeatably and forward task notes, attachments and deliv
   assert.ok(!/CLAUDE_PLUGIN_ROOT|\$SHARED|\$ARGUMENTS/.test(prompts[0].text))
 })
 
-test("models forwards the unchanged shared table with verbatim-display instructions", async () => {
+test("both model commands request only the models-per-level Markdown table", async () => {
   const { definitions, synthetic, prompts } = await commands()
   await definitions[1].execute({ sessionID: "session", prompt: { text: "ignored" }, delivery: "steer" })
   assert.deepEqual(synthetic, [])
   assert.equal(prompts.length, 1)
   assert.ok(prompts[0].text.endsWith(readFileSync(new URL("../shared/model-levels.md", import.meta.url), "utf8")))
-  assert.match(prompts[0].text, /exactly as written/)
+  const claude = readFileSync(new URL("../claude-code/commands/models.md", import.meta.url), "utf8")
+  for (const text of [prompts[0].text, claude]) {
+    assert.match(text, /Output only the Markdown\s+table under \*\*Models per level\*\*/)
+    assert.match(text, /including model IDs and trial restrictions/)
+    assert.match(text, /not a code block/)
+    assert.match(text, /Omit headings, dates, surrounding prose and all other sections/)
+  }
   assert.equal(prompts[0].delivery, "steer")
 })
 

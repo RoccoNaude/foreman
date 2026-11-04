@@ -99,7 +99,10 @@ export default { id: "command-fixture", async setup(ctx) {
     assert.match(text, /second|two|2/)
     assert.match(text, /must.fix|block/i)
   }
-  if (scenario === "models") assert.equal(text.trim(), readFileSync(join(root, "shared/model-levels.md"), "utf8").trim())
+  if (scenario === "models") {
+    const section = readFileSync(join(root, "shared/model-levels.md"), "utf8").split("## Models per level\n")[1]
+    assert.equal(text.trim(), section.match(/^\|[^\n]*(?:\n\|[^\n]*)*/m)[0])
+  }
   assert.equal(readFileSync(join(project, "source.js"), "utf8"), "export const value = 0\n")
   console.log(`PASS ${scenario}: ${project}`)
 }
