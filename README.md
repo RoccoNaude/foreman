@@ -174,6 +174,8 @@ foreman/
 ├── claude-code/
 │   ├── commands/         start-task, models
 │   └── agents/           reviewer
+├── .opencode/plugins/    OpenCode V2 entrypoint and implementation
+├── tests/               OpenCode package and runtime checks
 └── shared/               tool-neutral Markdown
     ├── model-levels.md
     └── templates/
@@ -182,8 +184,8 @@ foreman/
 ## Roadmap
 
 - **Claude Code:** available.
-- **OpenCode:** planned. Will reuse `shared/` with its own command and
-  reviewer.
+- **OpenCode V2:** [package foundation](.opencode/README.md) available for
+  development; commands and reviewer are not implemented yet. Reuses `shared/`.
 - **Hermes Agent:** planned, not yet researched.
 
 ## Maintenance
