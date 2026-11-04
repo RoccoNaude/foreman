@@ -68,7 +68,7 @@ model implemented it (cheap implementer, strong reviewer):
 | Tool | Reviewer | Model | Effort |
 |---|---|---|---|
 | Claude Code | `foreman:reviewer` (`claude-code/agents/reviewer.md`) | `claude-opus-5-5` | `medium`; `high` for level A tasks. Both set on the Agent call by `/foreman:start-task` (see Known behaviour). |
-| OpenCode | `foreman-reviewer` (`.opencode/plugins/reviewer.md`) | `openai/gpt-6.1-sol` | pinned `high` variant; never inherit the implementer's model |
+| OpenCode V2 | `foreman-reviewer` (`.opencode/plugins/reviewer.md`) | `openai/gpt-6.1-sol` | pinned `high` variant in `reviewerModel` (`.opencode/plugins/foreman.mjs`); never inherit the implementer's model |
 | Hermes Agent | planned, not built | a level A model from this table | to set |
 
 ## Known behaviour (Claude Code)
@@ -90,6 +90,25 @@ default is unknown. Either way `/foreman:start-task` sets `medium`, or
 `high` for level A, on every call. The reviewer ran `ponytail-review`
 through the Skill tool.
 
+## Known behaviour (OpenCode V2)
+
+Tested 4 November 2026 on **2.2.5**, including an installed tarball in isolated
+global and project-local configurations. The independent reviewer used
+`openai/gpt-6.1-sol#high` under a cheaper parent. A pre-dispatch guard blocks
+model/provider/variant substitution instead of silently inheriting the parent.
+
+`ponytail-review` is the **primary** review path and is installed separately.
+Only absence from the skill registry allows a disclosed complete manual fallback;
+a present skill that fails to load or execute blocks approval. Installed tests
+cover both paths, uncommitted/untracked defects, empty reviews, permissions,
+approval boundaries and two real blocking reviews followed by handback. See
+[`tests/README.md`](../tests/README.md) in the repository for coverage and evidence
+(tests are not packaged). Newer OpenCode versions are unverified.
+
+The reviewer denies edits and delegation; shell checks require permission.
+Permissions are not an OS sandbox, and shell commands can write. Plan, commit,
+merge and no-push rules are behavioral contracts, not hard enforcement.
+
 ## Cautions
 
 - **Local models in Claude Code** go through a proxy; the reviewer's
@@ -106,5 +125,6 @@ through the Skill tool.
   over 31 days old.
 - Change the reviewer's model ID in the same commit as the table, so the
   history shows which reviewer approved which fixes.
-- When a model is retired, its pinned ID fails with an error instead of
-  silently changing: update the table and the reviewer then.
+- OpenCode blocks a substituted reviewer model/variant before dispatch; if the
+  pin is unavailable or retired, update the table, runtime pin and tests together.
+  For Claude Code, verify provider/proxy routing separately as noted above.
