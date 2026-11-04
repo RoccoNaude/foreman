@@ -5,7 +5,7 @@
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
 ![Claude Code version](https://img.shields.io/badge/Claude_Code-0.2.3-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.1.1_private-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.1.1-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -156,7 +156,9 @@ opencode plugin add github:RoccoNaude/foreman
 This follows the repository's default branch. For reproducibility use
 `github:RoccoNaude/foreman#<full-commit-hash>` with a reviewed commit. The CLI
 changes global configuration; run it only if you want foreman in every project.
-The 0.1.0 package is private and **not published to npm**. Git installation uses
+The package is **not published to npm**; install from Git or a local tarball.
+`"private": true` in `package.json` prevents accidental npm publication; it does
+not make this public GitHub repository private. Git installation uses
 the contents of the selected revision, not unmerged work in this checkout.
 
 For project-local use, merge this into `opencode.jsonc` at the project root:
@@ -232,8 +234,8 @@ foreman/
 
 - **Claude Code:** available.
 - **OpenCode V2:** commands and independent skill-first reviewer implemented;
-  [installed-package acceptance](tests/README.md) passed on 2.2.5. Version 0.1.0
-  prepared for release, private/unpublished; Git and local installation supported.
+  [installed-package acceptance](tests/README.md) passed on 2.2.5.
+  Not published to npm; Git and local installation supported.
   Reuses `shared/` directly. Newer OpenCode versions are unverified.
 - **Hermes Agent:** planned, not yet researched.
 
@@ -261,9 +263,9 @@ get:
 The integrations have separate versions: `.claude-plugin/plugin.json` for
 Claude Code, root `package.json` for OpenCode. Shared-asset changes affect both,
 so bump both versions and their badges; integration-only changes need only that
-integration's bump. This preparation bumps Claude Code to 0.2.2 for the shared
-reviewer guidance and prepares private OpenCode 0.1.0. Neither is published by
-editing metadata. Commit/push, PR/merge, tags and publication require owner
+integration's bump. Current versions appear in the badges above and their
+respective manifests. Editing metadata does not publish either integration.
+Commit/push, PR/merge, tags and publication require owner
 approval under the repository's contribution agreement.
 
 ### Updating an installed copy
