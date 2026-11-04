@@ -4,7 +4,8 @@
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
-![Version](https://img.shields.io/badge/version-0.2.1-lightgrey.svg)
+![Claude Code version](https://img.shields.io/badge/Claude_Code-0.2.2-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.1.0_private-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -40,7 +41,8 @@ to a merge. It does not write your plan or run audits.
 
 ## How it works
 
-`/foreman:start-task <id> [notes]` takes a finding (`F01`) or a plan
+`/foreman:start-task <id> [notes]` (Claude Code) or
+`/foreman/start-task <id> [notes]` (OpenCode) takes a finding (`F01`) or a plan
 task (`5.2`) through eight steps. The amber steps wait for you.
 
 ```mermaid
@@ -86,7 +88,7 @@ flowchart TB
 | 3. Branch | `<id>-<short-name>` from a clean main branch. |
 | 4. Implement | The smallest complete change, plus its test. |
 | 5. Verify | Runs the project's checks (tests, lint, types) and fixes what fails. |
-| 6. Review | `foreman:reviewer` on `claude-opus-5-5`, read-only. Must fix items are fixed and reviewed once more; if any remain, it hands back to you. Items that can wait become new findings. |
+| 6. Review | Independent `foreman:reviewer` on `claude-opus-5-5` (Claude Code), or `foreman-reviewer` on `openai/gpt-6.1-sol#high` (OpenCode). `ponytail-review` is the primary path. OpenCode permits disclosed manual fallback only when the skill is unavailable; a skill execution failure blocks approval. Claude Code also permits fallback when the skill cannot run. Must fix items are fixed and reviewed once more; if any remain, it hands back to you. Items that can wait become new findings. |
 | 7. Record | Moves the finding to Implemented, or ticks the plan task with the date. |
 | 8. Commit and merge | Shows the diff and message (`F01: ...`), then asks before committing and again before merging. |
 
@@ -111,11 +113,13 @@ run:
 /foreman:models
 ```
 
+In OpenCode, use `/foreman/models` instead.
+
 ## Installation
 
 ### Requirements
 
-- [Claude Code](https://claude.com/claude-code)
+- [Claude Code](https://claude.com/claude-code) or OpenCode V2 (tested **2.2.5**, not V1)
 - git
 - Recommended: the [ponytail](https://github.com/DietrichGebert/ponytail)
   plugin. The reviewer uses its `ponytail-review` skill when available
@@ -136,6 +140,40 @@ Answer `y` to add the marketplace, then choose a scope. Or from a shell:
 claude plugin install foreman --marketplace RoccoNaude/foreman
 ```
 
+### OpenCode V2
+
+Requires access to `openai/gpt-6.1-sol#high` for the reviewer, plus a task-qualified
+implementation model. Install `ponytail-review` separately in OpenCode; Claude
+Code's plugin skills are not automatically shared. Node.js/npm are needed for
+the tarball route and development checks, not an SDK or build step.
+
+Global Git installation (supported by OpenCode; no npm publication required):
+
+```sh
+opencode plugin add github:RoccoNaude/foreman
+```
+
+This follows the repository's default branch. For reproducibility use
+`github:RoccoNaude/foreman#<full-commit-hash>` with a reviewed commit. The CLI
+changes global configuration; run it only if you want foreman in every project.
+The 0.1.0 package is private and **not published to npm**. Git installation uses
+the contents of the selected revision, not unmerged work in this checkout.
+
+For project-local use, merge this into `opencode.jsonc` at the project root:
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": ["github:RoccoNaude/foreman"]
+}
+```
+
+The same `plugins` entry in `~/.config/opencode/opencode.jsonc` (or
+`$XDG_CONFIG_HOME/opencode/opencode.jsonc`) is the manual global alternative.
+Preserve unrelated settings. For the **installed-directory tarball route tested
+in step 4**, checkout discovery, update/removal and security limits, see the
+[OpenCode guide](.opencode/README.md).
+
 ## Quick start
 
 1. **Add the settings.** Copy
@@ -147,8 +185,13 @@ claude plugin install foreman --marketplace RoccoNaude/foreman
    level, and run:
 
    ```
-   /foreman:start-task F01
-   ```
+    /foreman:start-task F01
+    ```
+
+   In OpenCode use `/foreman/start-task F01`. Put project rules and check commands
+   in `AGENTS.md`; do not assume Claude Code memories or `CLAUDE.md` are loaded.
+   Wait for plan approval, then approve commit and merge separately. These are
+   model instructions, not hard security controls.
 
 ## Project files
 
@@ -175,6 +218,10 @@ foreman/
 │   ├── commands/         start-task, models
 │   └── agents/           reviewer
 ├── .opencode/plugins/    OpenCode V2 entrypoint and implementation
+├── .opencode/README.md   OpenCode installation and maintenance
+├── package.json          OpenCode npm package metadata (private)
+├── AGENTS.md             Repository contributor instructions
+├── opencode/             Historical implementation notes (not packaged)
 ├── tests/               OpenCode package and runtime checks
 └── shared/               tool-neutral Markdown
     ├── model-levels.md
@@ -184,8 +231,10 @@ foreman/
 ## Roadmap
 
 - **Claude Code:** available.
-- **OpenCode V2:** [package foundation](.opencode/README.md) available for
-  development; commands and reviewer are not implemented yet. Reuses `shared/`.
+- **OpenCode V2:** commands and independent skill-first reviewer implemented;
+  [installed-package acceptance](tests/README.md) passed on 2.2.5. Version 0.1.0
+  prepared for release, private/unpublished; Git and local installation supported.
+  Reuses `shared/` directly. Newer OpenCode versions are unverified.
 - **Hermes Agent:** planned, not yet researched.
 
 ## Maintenance
@@ -194,9 +243,11 @@ Check [`shared/model-levels.md`](shared/model-levels.md) monthly, or when
 a new model appears. Change the reviewer's model ID in
 [`claude-code/agents/reviewer.md`](claude-code/agents/reviewer.md) in the
 same commit as the table, so the history shows which reviewer approved
-which change.
+which change. For OpenCode, change the `reviewerModel` constant in
+`.opencode/plugins/foreman.mjs` and its test expectations instead. See
+[OpenCode maintenance](.opencode/README.md#maintenance-and-release).
 
-### Releasing a change
+### Releasing a Claude Code change
 
 Claude Code caches each installed plugin by its version, so users only
 receive a change when the version goes up. For every change users should
@@ -206,6 +257,14 @@ get:
    (patch for fixes, minor for new behaviour) and the badge at the top of
    this file, in the same commit as the change or straight after it.
 2. Merge to `master` and push.
+
+The integrations have separate versions: `.claude-plugin/plugin.json` for
+Claude Code, root `package.json` for OpenCode. Shared-asset changes affect both,
+so bump both versions and their badges; integration-only changes need only that
+integration's bump. This preparation bumps Claude Code to 0.2.2 for the shared
+reviewer guidance and prepares private OpenCode 0.1.0. Neither is published by
+editing metadata. Commit/push, PR/merge, tags and publication require owner
+approval under the repository's contribution agreement.
 
 ### Updating an installed copy
 

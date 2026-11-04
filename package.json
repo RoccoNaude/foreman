@@ -1,8 +1,12 @@
 {
   "name": "opencode-foreman",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
-  "description": "Foreman plugin foundation for OpenCode V2",
+  "description": "One task per branch with model-level checks and independent skill-first review for OpenCode V2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RoccoNaude/foreman.git"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
