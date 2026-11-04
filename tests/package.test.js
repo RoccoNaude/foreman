@@ -22,6 +22,7 @@ for (const [key, directory] of Object.entries({
 for (const key of Object.keys(env)) {
   if (key.startsWith("OPENCODE_")) delete env[key]
 }
+env.OPENCODE_DISABLE_FREE_MODELS = "true"
 function run(command, args, cwd = sandbox) {
   return execFileSync(command, args, { cwd, env, encoding: "utf8", timeout: 120_000 })
 }
@@ -43,6 +44,7 @@ test("artifact contains unchanged shared sources and only intended runtime files
   }
   check("shared")
   assert.ok(files.includes(".opencode/plugins/foreman.mjs"))
+  assert.ok(files.includes(".opencode/plugins/reviewer.md"))
   assert.ok(files.includes(".opencode/plugins/index.js"))
   assert.ok(!files.some(path => /^(claude-code|\.claude-plugin|\.tmp|tests)\//.test(path)))
   assert.deepEqual(readdirSync(join(sandbox, "node_modules")), [".package-lock.json", "opencode-foreman"])
@@ -59,6 +61,7 @@ test("installed artifact loads globally and locally; agent transforms create and
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import foreman from "opencode-foreman"
+import { probe } from ${JSON.stringify(new URL("./runtime-probe.js", import.meta.url).href)}
 export default {
   id: "foreman-test-fixture",
   async setup(ctx) {
@@ -78,6 +81,12 @@ export default {
     await register()
     await ctx.agent.reload()
     assert.equal((await ctx.agent.list()).data.filter(agent => agent.id === id).length, 1)
+    await ctx.command.transform(editor => editor.add({
+      name: "foreman-test-probe",
+      execute: async () => {
+        await probe(ctx)
+      },
+    }))
   },
 }
 `)
@@ -88,12 +97,27 @@ export default {
   mkdirSync(project)
   mkdirSync(otherProject)
   const localConfig = join(project, "opencode.json")
-  const config = { plugins: [installed, fixture] }
+  const config = {
+    plugins: [installed, fixture],
+    model: "openai/gpt-6-luna",
+    providers: { openai: {
+      settings: { apiKey: "test-only", baseURL: "http://127.0.0.1:1/v1" },
+    } },
+  }
   function agents(cwd) {
     return JSON.parse(run("opencode", ["api", "--standalone", "get", "/api/agent"], cwd)).data
   }
   function check(cwd, expected) {
-    const matches = agents(cwd).filter(agent => agent.id === "foreman-test-reviewer")
+    const available = agents(cwd)
+    const reviewer = available.filter(agent => agent.id === "foreman-reviewer")
+    // The checkout is discovered in local mode even without explicit config.
+    if (expected || !env.OPENCODE_CONFIG_PROJECT_DISABLE) {
+      assert.equal(reviewer.length, 1)
+      assert.equal(reviewer[0].mode, "subagent")
+      assert.deepEqual(reviewer[0].model, { providerID: "openai", id: "gpt-6.1-sol", variant: "high" })
+      assert.equal(reviewer[0].system, readFileSync(join(root, ".opencode/plugins/reviewer.md"), "utf8"))
+    } else assert.equal(reviewer.length, 0)
+    const matches = available.filter(agent => agent.id === "foreman-test-reviewer")
     assert.equal(matches.length, expected ? 1 : 0)
     if (expected) {
       assert.equal(matches[0].mode, "subagent")
@@ -161,6 +185,7 @@ export default {
       const agents = await request("/api/agent")
       const plugins = await request("/api/plugin")
       if (agents.filter(agent => agent.id === "foreman-test-reviewer").length === (expected ? 1 : 0)
+        && agents.filter(agent => agent.id === "foreman-reviewer").length === (expected ? 1 : 0)
         && plugins.filter(plugin => plugin.id === "foreman" && plugin.state.status === "active").length === (expected ? 1 : 0)) return
       await new Promise(resolve => setTimeout(resolve, 100))
     } while (Date.now() < deadline)
@@ -180,6 +205,20 @@ export default {
   await waitForLoaded(true)
   const configured = (await request("/api/plugin")).find(plugin => plugin.id === "foreman")
   assert.equal(configured.source.path, installed)
+  const headers = {
+    Authorization: `Basic ${Buffer.from(`opencode:${connection.password}`).toString("base64")}`,
+    "Content-Type": "application/json",
+  }
+  const sessionResponse = await fetch(`${connection.url}/api/session`, {
+    method: "POST", headers, body: "{}",
+  })
+  assert.equal(sessionResponse.status, 200)
+  const session = (await sessionResponse.json()).data
+  const probeResponse = await fetch(`${connection.url}/api/session/${session.id}/command`, {
+    method: "POST", headers, body: JSON.stringify({ name: "foreman-test-probe", text: "" }),
+    signal: AbortSignal.timeout(30_000),
+  })
+  assert.equal(probeResponse.status, 204, await probeResponse.text())
   writeFileSync(localConfig, "{}")
   await waitForLoaded(false)
   writeFileSync(localConfig, JSON.stringify(config))
