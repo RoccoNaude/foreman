@@ -68,7 +68,7 @@ model implemented it (cheap implementer, strong reviewer):
 | Tool | Reviewer | Model | Effort |
 |---|---|---|---|
 | Claude Code | `foreman:reviewer` (`claude-code/agents/reviewer.md`) | `claude-opus-5-5` | `medium`; `high` for level A tasks. Both set on the Agent call by `/foreman:start-task` (see Known behaviour). |
-| OpenCode | planned, not built | a level A model from this table | to set |
+| OpenCode | `foreman-reviewer` (`.opencode/plugins/reviewer.md`) | `openai/gpt-6.1-sol` | pinned `high` variant; never inherit the implementer's model |
 | Hermes Agent | planned, not built | a level A model from this table | to set |
 
 ## Known behaviour (Claude Code)
