@@ -145,9 +145,9 @@ export default {
   assert.deepEqual(readdirSync(join(env.XDG_CONFIG_HOME, "opencode")), ["opencode.json"])
 
   // Exercise automatic cleanup on config reload, not just explicit disposal.
-  async function startServer(serverEnv) {
+  async function startServer(serverEnv, cwd = project) {
     const server = spawn("opencode", ["serve", "--hostname", "127.0.0.1", "--port", "0"], {
-      cwd: project, env: serverEnv, stdio: ["ignore", "pipe", "pipe"],
+      cwd, env: serverEnv, stdio: ["ignore", "pipe", "pipe"],
     })
     t.after(() => server.kill())
     return await new Promise((accept, reject) => {
@@ -208,6 +208,20 @@ export default {
   await waitForLoaded(true)
   const configured = (await request("/api/plugin")).find(plugin => plugin.id === "foreman")
   assert.equal(configured.source.path, installed)
+  // Global contributions must work in both consumers without project copies.
+  connection.server.kill()
+  writeFileSync(globalConfig, JSON.stringify(config))
+  writeFileSync(localConfig, "{}")
+  for (const cwd of [project, otherProject]) {
+    connection = await startServer({ ...env, OPENCODE_CONFIG_PROJECT_DISABLE: "true" }, cwd)
+    await waitForLoaded(true)
+    assert.equal((await request("/api/plugin")).find(plugin => plugin.id === "foreman").source.path, installed)
+    connection.server.kill()
+  }
+  writeFileSync(globalConfig, "{}")
+  writeFileSync(localConfig, JSON.stringify(config))
+  connection = await startServer({ ...env, OPENCODE_CONFIG_PROJECT_DISABLE: "true", OPENCODE_CONFIG: localConfig })
+  await waitForLoaded(true)
   const headers = {
     Authorization: `Basic ${Buffer.from(`opencode:${connection.password}`).toString("base64")}`,
     "Content-Type": "application/json",
