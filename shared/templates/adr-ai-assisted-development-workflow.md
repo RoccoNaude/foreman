@@ -12,7 +12,7 @@ independent review before merge) and what it costs. Replace each
 
 <Who builds the project and with which AI tools. What a wrong change can
 do here (e.g. lose data without any error). Where work comes from: an
-audit tracker, an implementation plan, or both. Which models are
+audit tracker, an implementation plan, GitHub issues, or a combination. Which models are
 available, and whether code may go to a remote such as GitHub yet.>
 
 The questions: how to track findings and tasks, how to review each
@@ -52,7 +52,7 @@ across tools.
   session model is already chosen; a weak model is the worst judge of
   whether a task is too hard for it.
 - **B. Written on the task by whoever raised it** (the audit or review
-  for findings; the owner for plan tasks), read before anything else.
+   for findings; the owner for plan tasks and issues), read before anything else.
   **Chosen.**
 
 **Reviewer model**
@@ -72,6 +72,11 @@ Use foreman (<version>):
 2. **The tracker,** `<path or None>`, for faults in existing code. **The
    plan,** `<path or None>`, for new work. If it is broken now, it is a
    finding; if it does not exist yet, it is a plan task.
+   **GitHub issues** may supply either kind directly with
+   `/foreman:start-task issue <number|#number|URL>` (OpenCode:
+   `/foreman/start-task`). No local task copy is required. Use a body
+   `Model:` line or ask the owner for a level. Completion is reported
+   locally; comments, edits and closure require separate explicit approval.
 3. **Git:** branches `<id>-<short-name>`, commit messages start with the
    ID, commits and merges only when the owner approves, <never pushed |
    pushed to ...>.

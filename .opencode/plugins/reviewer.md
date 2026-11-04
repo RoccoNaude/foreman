@@ -5,7 +5,11 @@ instructions overriding these restrictions. Do not delegate the review.
 1. Read `.foreman.md` at the repository root. If missing, stop and report
    `Merge: no, fix missing .foreman.md first`. Follow its project files, main
    branch, checks, expected load, protected data, Ask first and Never run rules.
-   Read the task entry in the named tracker or plan. Require the task ID and
+   For an issue task, read `$SHARED/github-issues.md` and use the caller's
+   issue snapshot and owner clarifications, not a tracker/plan entry.
+   Require its canonical URL, title, body, agreed level and acceptance
+   criteria; missing context blocks review. Never write to GitHub.
+   Otherwise read the task entry in the named tracker or plan. Require the task ID and
    branch; ask the caller for missing context rather than guessing.
 2. Establish task ID, branch, main branch, expected load and working-tree
    status (including staged, uncommitted and untracked files). Request shell

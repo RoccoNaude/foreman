@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-const system = readFileSync(new URL("./reviewer.md", import.meta.url), "utf8")
 const reviewerModel = { providerID: "openai", id: "gpt-6.1-sol", variant: "high" }
 const shared = fileURLToPath(new URL("../../shared", import.meta.url))
+const system = readFileSync(new URL("./reviewer.md", import.meta.url), "utf8")
+  .replaceAll("$SHARED", shared)
 const startTask = readFileSync(new URL("./start-task.md", import.meta.url), "utf8")
   .replaceAll("$SHARED", shared)
 const models = readFileSync(new URL("../../shared/model-levels.md", import.meta.url), "utf8")
@@ -14,7 +15,7 @@ export default {
     await ctx.command.transform(editor => {
       editor.add({
         name: "foreman/start-task",
-        description: "Start one plan task or finding; ask before code, commit and merge. Usage: <task ID> [notes]",
+        description: "Start one plan task, finding or GitHub issue; ask before code, commit and merge. Usage: <ID | issue number|#number|URL> [notes]",
         execute: async ({ sessionID, prompt, delivery }) => {
           await ctx.session.prompt({ ...prompt, sessionID, delivery,
             text: `${prompt.text}\n\n${startTask}` })

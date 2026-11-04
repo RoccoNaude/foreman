@@ -4,14 +4,14 @@
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
-![Claude Code version](https://img.shields.io/badge/Claude_Code-0.2.3-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.1.1-lightgrey.svg)
+![Claude Code version](https://img.shields.io/badge/Claude_Code-0.3.0-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.0-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
 the right grade, then inspects the work before it is signed off:
 
-- **One task, one branch.** Every task from your plan or audit tracker
+- **One task, one branch.** Every task from your plan, audit tracker or GitHub issues
   gets its own branch, review and merge.
 - **The right model for the task.** Each task carries a level (A, B, C
   or Human). A cheap model does mechanical work; risky work needs a
@@ -43,7 +43,27 @@ to a merge. It does not write your plan or run audits.
 
 `/foreman:start-task <id> [notes]` (Claude Code) or
 `/foreman/start-task <id> [notes]` (OpenCode) takes a finding (`F01`) or a plan
-task (`5.2`) through eight steps. The amber steps wait for you.
+task (`5.2`), or `issue <number|#number|URL>` through eight steps. The amber steps wait for you.
+
+```text
+/foreman:start-task issue 42
+/foreman:start-task issue #42 Focus on the import failure
+/foreman/start-task issue https://github.com/owner/repo/issues/42
+```
+
+Numbers use the checkout's GitHub repository; URLs identify it explicitly.
+Ambiguous repositories and cross-repository work need clarification. Issue
+access requires an available GitHub connector or authenticated `gh` (only for
+issue tasks). Inaccessible issues, closed issues, pull-request URLs and unclear
+acceptance criteria stop for clarification. Text after the complete reference
+is your notes; existing finding/plan syntax is unchanged.
+
+An optional `Model: A|B|C|Human (then X)` line in the issue body supplies
+the level; if missing, foreman asks you, never estimates. Invalid or conflicting
+levels also need clarification. Issues remain their own task source: no local
+plan/tracker copy is required. Completion is reported locally; foreman does not
+comment on, edit or close issues without separate explicit approval, and avoids
+automatic-closing commit text. See [shared issue rules](shared/github-issues.md).
 
 ```mermaid
 flowchart TB
@@ -72,7 +92,7 @@ flowchart TB
     mustfix -- "yes, second round" --> hand(["`Hand back
     to you`"])
     mustfix -- no --> record["`**7. Record**
-    tracker or plan`"]
+    tracker, plan or local report`"]
     record --> commit{"`**8. Commit, then merge**
     each with your yes`"}
     commit --> done(["Merged, not pushed"])
@@ -89,7 +109,7 @@ flowchart TB
 | 4. Implement | The smallest complete change, plus its test. |
 | 5. Verify | Runs the project's checks (tests, lint, types) and fixes what fails. |
 | 6. Review | Independent `foreman:reviewer` on `claude-opus-5-5` (Claude Code), or `foreman-reviewer` on `openai/gpt-6.1-sol#high` (OpenCode). `ponytail-review` is the primary path. OpenCode permits disclosed manual fallback only when the skill is unavailable; a skill execution failure blocks approval. Claude Code also permits fallback when the skill cannot run. Must fix items are fixed and reviewed once more; if any remain, it hands back to you. Items that can wait become new findings. |
-| 7. Record | Moves the finding to Implemented, or ticks the plan task with the date. |
+| 7. Record | Moves the finding to Implemented, ticks the plan task with the date, or reports issue completion locally without changing GitHub. |
 | 8. Commit and merge | Shows the diff and message (`F01: ...`), then asks before committing and again before merging. |
 
 ## Model levels
@@ -181,8 +201,9 @@ in step 4**, checkout discovery, update/removal and security limits, see the
 1. **Add the settings.** Copy
    [`shared/templates/settings.md`](shared/templates/settings.md) to
    `.foreman.md` at your repository root and fill it in.
-2. **Add a tracker, a plan or both** from
-   [`shared/templates/`](shared/templates/).
+2. **Choose a task source:** add a tracker, a plan or both from
+   [`shared/templates/`](shared/templates/), or use GitHub issues. For
+   issue-only work, Tracker and Plan can both be `None` in `.foreman.md`.
 3. **Commit them,** start a session on a model that meets the task's
    level, and run:
 
@@ -210,6 +231,10 @@ short note on what the file is for.
 
 > **Finding or plan task?** If it is broken now, it is a finding. If it
 > does not exist yet, it is a plan task.
+
+GitHub issues can describe either kind of work without duplicating it in these
+files. `.foreman.md` is still required for issue tasks; its checks and safeguards
+apply unchanged. The reviewer receives the issue snapshot and your clarifications.
 
 ## Repository layout
 

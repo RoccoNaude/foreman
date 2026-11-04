@@ -8,6 +8,8 @@ node tests/live-review.js
 node tests/live-commands.js
 node tests/live-workflow.js
 node tests/live-workflow.js --blocking
+node tests/live-commands.js --issues
+node tests/live-workflow.js --issue
 ```
 
 The live commands consume model tokens and require existing OpenAI
@@ -16,6 +18,26 @@ installation. They export/import only OpenAI credentials through memory into
 isolated state, then remove the isolated credential database on exit.
 All fixtures, npm artifacts, caches and evidence live in repository `.tmp/`.
 No owner configuration is changed; nothing is published or pushed.
+
+The issue checks use GPT-6.1 Sol `medium` for implementation and the existing
+Sol `high` reviewer. `live-commands.js --issues` reads real issue #16 through
+authenticated `gh` using number and URL inputs, verifies its title/level, stops
+before source inspection, and checks PR-URL rejection. It uses the existing
+GitHub CLI configuration read-only (`GH_CONFIG_DIR`, or the normal config path).
+Its shell guard permits only issue reads and remote inspection; no GitHub write
+is authorized. This check requires #16 to remain open with its expected title
+and `Model: A` line. The guard and all transcripts are test artifacts, not
+product security controls.
+
+`live-workflow.js --issue` instead uses a **synthetic issue transport** (`gh`
+fixture) for a tiny implementation in a disposable repository. The model,
+checks and independent reviewer are real. It exercises issue-only settings,
+branch naming, supplied reviewer snapshot, local completion and separate
+fixture-owner approvals through commit/merge. Those approvals apply only to
+the disposable fixture, not to this repository. It asserts issue reads only
+and no automatic-closing commit text. It does not prove real GitHub access;
+the separate real-read check does. Neither run covers every access-failure or
+model-clarification scenario, nor Claude Code live behavior.
 
 ## Coverage
 
@@ -79,3 +101,26 @@ interactive permission dialogs. Hard reviewer denials are tested separately.
 Baseline: OpenCode **2.2.5**. Newer versions are not verified. See the task's
 recorded run results for executed checks; the coverage table describes what
 the scripts assert, not a claim that every run passes.
+
+## Issue #16 acceptance status
+
+- Deterministic suite: all 11 tests passed.
+- OpenCode 2.2.5 with GPT-6.1 Sol medium: real issue reads by number and URL,
+  title/model-level checks and PR-URL rejection passed in
+  `.tmp/live-commands-BI8uGO/`. The first attempt rejected quoted read arguments
+  in the test guard; that harness defect was corrected before the passing run.
+- Synthetic issue workflow `.tmp/live-workflow-YUnfib/` reached independent
+  review and separately approved fixture commit/merge, then failed its final
+  no-write assertion: a read-only `gh api` GET was not recognized by the
+  harness. Its trace contained no write attempt. The guard now permits that
+  exact GET and rejects PATCH/data arguments. Do not count this run as a pass.
+- The corrected synthetic issue workflow passed in
+  `.tmp/live-workflow-gq5TE6/`: implementation, configured checks, independent
+  Sol-high review, separate fixture commit/merge approvals and final read-only
+  GitHub transport assertions. This run preceded the additional keyword-form
+  assertion strengthening; those self-checks were independently reviewed.
+- Remaining live acceptance, including all Claude Code live checks and
+  broader failure cases, is tracked in
+  [issue #17](https://github.com/RoccoNaude/foreman/issues/17), separately from
+  the implementation merge. No complete cross-integration live acceptance is
+  claimed here. Local `.tmp/` evidence is not part of the published package.

@@ -11,6 +11,9 @@ where a section does not apply.
 
 ## Files
 
+For GitHub-issue-only work, Tracker and Plan may both be `None`. These
+settings and checks are still required; issues are not copied into local files.
+
 - **Tracker:** `docs/planning/code-audit.md` (findings `F01`, ...;
   template `shared/templates/code-audit.md`), or `None`
 - **Plan:** `docs/planning/implementation-plan.md` (tasks `5.2`, ...;

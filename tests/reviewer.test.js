@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 import test from "node:test"
 import foreman from "../.opencode/plugins/foreman.mjs"
 
@@ -52,7 +53,10 @@ test("dispatch guard blocks fallback models and variants, not other agents", asy
 
 test("shipped review policy keeps skill-first, fallback and incomplete-review boundaries", async () => {
   const { system } = await reviewer()
-  assert.equal(system, readFileSync(new URL("../.opencode/plugins/reviewer.md", import.meta.url), "utf8"))
+  assert.equal(system, readFileSync(new URL("../.opencode/plugins/reviewer.md", import.meta.url), "utf8")
+    .replaceAll("$SHARED", fileURLToPath(new URL("../shared", import.meta.url))))
+  assert.ok(system.includes(fileURLToPath(new URL("../shared/github-issues.md", import.meta.url))))
+  assert.ok(!system.includes("$SHARED"))
   for (const requirement of [
     "Read `.foreman.md`", "Read the task entry", "task ID, branch, main branch, expected load",
     "including staged, uncommitted and untracked", "BEFORE independently inspecting",

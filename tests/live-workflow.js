@@ -7,6 +7,14 @@ import { fileURLToPath } from "node:url"
 
 const root = fileURLToPath(new URL("../", import.meta.url))
 const blocking = process.argv.includes("--blocking")
+const issue = process.argv.includes("--issue")
+const automaticClosing = /\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\b/i
+for (const keyword of ["fix", "fixes", "fixed", "close", "closes", "closed", "resolve", "resolves", "resolved"]) assert.ok(automaticClosing.test(`${keyword} #42`))
+assert.ok(!automaticClosing.test("Issue #42: correct exported value"))
+const isIssueRead = args => (args[0] === "issue" && args[1] === "view")
+  || (args.length === 2 && args[0] === "api" && args[1] === "repos/fixture/consumer/issues/42")
+assert.ok(isIssueRead(["api", "repos/fixture/consumer/issues/42"]))
+for (const args of [["issue", "close", "42"], ["api", "repos/fixture/consumer/issues/42", "--method", "PATCH"], ["api", "repos/fixture/consumer/issues/42", "-f", "state=closed"]]) assert.ok(!isIssueRead(args))
 // Conservative fixture guard: allow Git global options, reject mutating subcommands.
 const forbiddenGit = /\bgit\b[^;&|\n]*\b(?:commit|merge|push)\b/
 for (const command of ["git commit -m test", "git -C . commit -m test", "git -c user.name=Fixture merge main", "git push"]) assert.ok(forbiddenGit.test(command))
@@ -80,10 +88,11 @@ export default { id: "workflow-fixture", async setup(ctx) {
       turns.push({text,context,branch:git("branch","--show-current"),head:git("rev-parse","HEAD"),status:git("status","--porcelain")})
       writeFileSync(${JSON.stringify(evidence)}, JSON.stringify({turns,trace,injections},null,2))
     }
-    await turn("F01", true)
+    await turn(${JSON.stringify(issue ? "issue #42 Keep the change limited to source.js and its test." : "F01")}, true)
     assert.equal(git("status","--porcelain"), "", "Plan approval must precede edits")
     assert.equal(git("branch","--show-current"), "main")
     await turn("Test user: I approve the proposed plan and task branch. Implement, run checks and obtain the independent reviewer. You may run read-only Git inspection and node checks. Stop before committing; commit and merge are NOT approved.")
+    if (${issue}) assert.match(git("branch", "--show-current"), /^issue-42-/)
     assert.equal(git("rev-parse","main"), baseline)
     assert.equal(git("rev-parse","HEAD"), baseline, "No commit without approval")
     assert.notEqual(git("branch","--show-current"), "main")
@@ -137,11 +146,26 @@ export default { id: "workflow-fixture", async setup(ctx) {
 const config = join(sandbox, "opencode.json")
 env.OPENCODE_CONFIG = config
 writeFileSync(config, JSON.stringify({ plugins: [installed, fixture], model: "openai/gpt-6.1-sol#medium" }))
-writeFileSync(join(project, ".foreman.md"), "# Fixture\nMain branch: main\nTracker: tasks.md\nPlan: None\nExpected load: one user importing a constant; no concurrency or performance requirements.\nChecks: node --test source.test.js\nReview authorization: The fixture owner approves read-only Git inspection and the configured Node check during independent review. No additional conversational approval is needed for those checks.\nProtected data: none\nAsk first: commits and merges\nLevel A also covers: none\n")
-writeFileSync(join(project, "tasks.md"), "# Open findings\n## F01: Correct value\n**Model**: A\nStatus: Open\nChange source.js value from 0 to 1 and add source.test.js asserting it is 1.\n\n# Implemented\n| ID | Date | Change | Test |\n|---|---|---|---|\n")
+writeFileSync(join(project, ".foreman.md"), `# Fixture\nMain branch: main\nTracker: ${issue ? "None" : "tasks.md"}\nPlan: None\nExpected load: one user importing a constant; no concurrency or performance requirements.\nChecks: node --test source.test.js\nReview authorization: The fixture owner approves read-only Git inspection and the configured Node check during independent review. No additional conversational approval is needed for those checks.\nProtected data: none\nAsk first: commits and merges\nLevel A also covers: none\n`)
+if (!issue) writeFileSync(join(project, "tasks.md"), "# Open findings\n## F01: Correct value\n**Model**: A\nStatus: Open\nChange source.js value from 0 to 1 and add source.test.js asserting it is 1.\n\n# Implemented\n| ID | Date | Change | Test |\n|---|---|---|---|\n")
+const ghTrace = join(sandbox, "gh-reads.jsonl")
+if (issue) {
+  // Synthetic issue transport; the live-commands --issues suite tests real GitHub access.
+  const bin = join(sandbox, "bin")
+  mkdirSync(bin)
+  env.PATH = `${bin}:${env.PATH}`
+  writeFileSync(join(bin, "gh"), `#!/usr/bin/env node
+const { appendFileSync } = require("node:fs")
+const args = process.argv.slice(2)
+appendFileSync(${JSON.stringify(ghTrace)}, JSON.stringify(args) + "\\n")
+if (!(${isIssueRead.toString()})(args)) process.exit(1)
+console.log(JSON.stringify({number:42,url:"https://github.com/fixture/consumer/issues/42",title:"Correct exported value",state:"OPEN",body:"Model: A\\nChange source.js value from 0 to 1 and add source.test.js asserting it is 1. No other behavior is required."}))
+`, { mode: 0o755 })
+}
 writeFileSync(join(project, "package.json"), '{"type":"module"}')
 writeFileSync(join(project, "source.js"), "export const value = 0\n")
 run("git", ["init", "-b", "main"], project)
+if (issue) run("git", ["remote", "add", "origin", "https://github.com/fixture/consumer.git"], project)
 run("git", ["config", "user.name", "Fixture"], project)
 run("git", ["config", "user.email", "fixture@example.invalid"], project)
 run("git", ["add", "."], project)
@@ -156,4 +180,11 @@ if (blocking) {
   run("node", ["--test", "source.test.js"], project)
   assert.equal(run("git", ["branch", "--format=%(refname:short)"], project).trim(), "main")
 }
-console.log(`PASS ${blocking ? "second blocking review handback" : "approved workflow"}: ${sandbox}`)
+if (issue) {
+  const reads = readFileSync(ghTrace, "utf8").trim().split("\n").map(line => JSON.parse(line))
+  assert.ok(reads.length > 0)
+  assert.ok(reads.every(isIssueRead), "No GitHub writes")
+  assert.ok(!automaticClosing.test(run("git", ["log", "--format=%B"], project)), "No automatic-closing commit text")
+  assert.ok(!readFileSync(join(project, ".foreman.md"), "utf8").includes("Tracker: tasks.md"))
+}
+console.log(`PASS ${issue ? "synthetic issue " : ""}${blocking ? "second blocking review handback" : "approved workflow"}: ${sandbox}`)

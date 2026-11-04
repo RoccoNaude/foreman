@@ -1,12 +1,14 @@
 ---
-description: Start one plan task or audit finding on its own branch, fix, review, then merge (asks before code, commit and merge)
-argument-hint: <plan task e.g. 5.2 | finding e.g. F01> [notes]
+description: Start one plan task, audit finding or GitHub issue; ask before code, commit and merge
+argument-hint: <5.2 | F01 | issue <number|#number|URL>> [notes]
 ---
 
 Work on this task: $ARGUMENTS
 
-The first word is the task ID; anything after it is my notes for this
-task.
+For `issue <number|#number|URL> [notes]`, read and follow
+`${CLAUDE_PLUGIN_ROOT}/shared/github-issues.md`; the complete reference
+precedes my notes. Otherwise the first word is the task ID; anything
+after it is my notes for this task.
 
 0. **Read the settings.** Read `.foreman.md` at the repository root:
    the project's files, checks, protected data and rules. If it is
@@ -15,11 +17,16 @@ task.
    it in. The model table is
    `${CLAUDE_PLUGIN_ROOT}/shared/model-levels.md`.
    - An ID like `F01` is a finding in the settings' **Tracker**; an ID
-     like `5.2` is a task in the settings' **Plan**. Any other shape, or
-     a file the settings mark `None`: stop and say so.
+      like `5.2` is a task in the settings' **Plan**. `issue` uses the
+      shared GitHub rules instead; Tracker and Plan may both be `None`.
+      Any other shape: stop and say so. For local tasks, a file the
+      settings mark `None` also stops. An absent entry also stops;
+      never invent a task.
 1. **Read the task and check the model.** Read only the task's entry,
    then do the model check before reading any code:
-   - Read the task's level: the finding's **Model** line, or the plan
+    - Issue: read its level using the shared GitHub rules, then apply the
+      same project overrides and session model check below.
+    - Read a local task's level: the finding's **Model** line, or the plan
      task's `(model: X)` tag. A plan task with none: stop and ask me for
      a level (do not estimate); remember it and write the tag onto the
      task on the branch, after step 3.
@@ -43,7 +50,8 @@ task.
    approve before writing code.
 3. **Branch.** `git status` must be clean on the settings' main branch.
    Create the branch `<id>-<short-kebab-name>` (e.g.
-   `f01-stock-walk-start`, `plan-5.2-stock-top-up`). Write a plan
+    `f01-stock-walk-start`, `plan-5.2-stock-top-up`, or for issues
+    `issue-42-import-failure`). Write a plan
    task's new model tag now.
 4. **Implement** the smallest complete change plus its test. Do nothing
    listed under the settings' **Ask first** unless the task needs it;
@@ -52,7 +60,9 @@ task.
 5. **Verify.** Run every command in the settings' **Checks**. Show the
    result; fix what fails.
 6. **Review.** Start the `foreman:reviewer` agent with the branch name
-   and the task ID, and say the changes are uncommitted. Always set the
+    and the task ID, and say the changes are uncommitted. For issues,
+    also supply the snapshot and clarifications required by the shared
+    GitHub rules. Always set the
    Agent call's `effort`: `medium`, or `high` for a level A task (the
    session's effort does not reach the agent; see the model table). If
    the review has Must fix findings: fix them on the branch, verify
@@ -63,6 +73,7 @@ task.
    source "review of <id>"; with no tracker, list them for me. Never add them
    to the plan.
 7. **Record.**
+    - Issue: report locally as specified in the shared GitHub rules.
    - Finding: move it to the **Implemented** table (date, what changed,
      the guarding test) and delete its open entry.
    - Plan task: tick its checkbox with the date, matching the plan's
@@ -70,6 +81,7 @@ task.
    - If the settings name a **Notes file**, say what change to project
      status it should reflect; do not edit it.
 8. **Commit and merge.** Show the diff summary and proposed commit
-   message (`F01: <what changed>` or `Plan 5.2: <what changed>`). Ask
+    message (`F01: <what changed>`, `Plan 5.2: <what changed>` or
+    `Issue #42: <what changed>`; no automatic-closing text). Ask
    before committing, then ask before merging into the main branch and
    deleting the task branch. Never push.

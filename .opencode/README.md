@@ -2,22 +2,32 @@
 
 Commands and independent review are implemented and acceptance-tested with
 OpenCode **2.2.5**. V1 is unsupported; newer versions are unverified.
-Package **0.1.0** is release preparation, private and not published to npm.
+The package is private and not published to npm.
 
 ## Commands and prerequisites
 
 - `/foreman/start-task <id> [notes]`: model check, plan approval, branch,
   implementation/checks, independent review, recording, separate commit and merge
   approvals. One fix/review retry; a second blocking review hands back to you.
-- `/foreman/models`: displays the packaged shared model table unchanged.
+- `/foreman/models`: displays only the packaged models-per-level table unchanged.
 - `foreman-reviewer`: independent subagent pinned to `openai/gpt-6.1-sol#high`.
 
 You need git, OpenCode V2, access to the pinned OpenAI reviewer and a qualified
 implementation model. Install `ponytail-review` separately for the primary review
-path. Create `.foreman.md` and a tracker/plan from the original
+path. Create `.foreman.md` and, for local tasks, a tracker/plan from the original
 [`shared/templates/`](../shared/templates/) assets. Put project rules in
 `AGENTS.md`; Claude Code memories and plugin skills do not transfer automatically.
 See the [quick start](../README.md#quick-start).
+
+GitHub issues are a third source: `/foreman/start-task issue 42`,
+`issue #42 [notes]` or `issue https://github.com/owner/repo/issues/42 [notes]`.
+An available GitHub connector or authenticated `gh` is needed only for issues.
+Missing/ambiguous repository identity, access failures, closed issues, PR URLs
+and unclear acceptance criteria stop for clarification. A missing `Model:` line
+prompts for a level, never an estimate. Tracker and Plan may both be `None` for
+issue-only work. Review uses the supplied issue snapshot; completion is local,
+not a GitHub comment/edit/closure. Remote writes need separate approval.
+See [shared issue rules](../shared/github-issues.md) for the full policy.
 
 ## Global Git and project-local installation
 
@@ -75,7 +85,7 @@ To disable it in a checkout, configure `"plugins": ["-foreman"]` in
 Install the tarball into a directory you choose:
 
 ```sh
-npm install --prefix /absolute/path/to/foreman-install --ignore-scripts --no-audit --no-fund /path/to/opencode-foreman-0.1.0.tgz
+npm install --prefix /absolute/path/to/foreman-install --ignore-scripts --no-audit --no-fund /path/to/opencode-foreman-0.2.0.tgz
 ```
 
 Then configure the installed **directory**, not the tarball, in either your global
@@ -142,7 +152,8 @@ References: [plugin loading](https://opencode.ai/v2/docs/plugins/),
 ## Reviewer
 
 Invoke `foreman-reviewer` as an independent subagent with the task ID and branch.
-It requires `.foreman.md` and the task's tracker/plan entry. The pinned model is
+It requires `.foreman.md` and the task's tracker/plan entry or complete issue
+snapshot and owner clarifications. The pinned model is
 `openai/gpt-6.1-sol#high` (level A); configure access to that model before use.
 To upgrade it, change `reviewerModel` in `.opencode/plugins/foreman.mjs`, then
 update the shared model table and test expectations. Registration and the
