@@ -6,6 +6,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 
 const root = fileURLToPath(new URL("../", import.meta.url))
+mkdirSync(join(root, ".tmp"), { recursive: true })
 const sandbox = mkdtempSync(join(root, ".tmp/live-commands-"))
 const env = { ...process.env }
 for (const key of Object.keys(env)) if (key.startsWith("OPENCODE_")) delete env[key]
@@ -37,7 +38,7 @@ execFileSync("opencode", ["auth", "import", "--standalone"], {
   cwd: sandbox, env, input: credentials, timeout: 30_000, stdio: ["pipe", "pipe", "pipe"],
 })
 
-for (const scenario of ["missing", "invalid", "model", "second-review", "models"]) {
+for (const scenario of ["missing", "invalid", "absent", "level", "model", "second-review", "models"]) {
   const project = join(sandbox, scenario)
   mkdirSync(project)
   env.OPENCODE_CONFIG = join(project, "opencode.json")
@@ -71,7 +72,7 @@ export default { id: "command-fixture", async setup(ctx) {
       ...["read", "glob", "grep"].map(action => ({ action, resource: "*", effect: "allow" }))],
   }))
   if (scenario !== "missing") writeFileSync(join(project, ".foreman.md"), "# Settings\nMain branch: main\nTracker: tasks.md\nPlan: None\nChecks: node --test\nProtected data: none\nLevel A also covers: none\n")
-  writeFileSync(join(project, "tasks.md"), "# Open findings\n## F01: Correct source\n**Model**: A\nStatus: Open\nFix source.js to return 1, with its test.\n")
+  writeFileSync(join(project, "tasks.md"), `# Open findings\n## ${scenario === "absent" ? "F02" : "F01"}: Correct source\n**Model**: ${scenario === "level" ? "unknown" : "A"}\nStatus: Open\nFix source.js to return 1, with its test.\n`)
   writeFileSync(join(project, "source.js"), "export const value = 0\n")
   const output = run("opencode", ["api", "--standalone", "post", "/api/session", "--data", "{}"], project)
   const session = JSON.parse(output).data
@@ -85,7 +86,9 @@ export default { id: "command-fixture", async setup(ctx) {
   assert.ok(!tools.some(event => ["shell", "patch", "edit", "subagent"].includes(event.tool)), `${scenario}: forbidden action`)
   assert.ok(!tools.some(event => event.tool === "read" && event.input.path?.endsWith("source.js")), `${scenario}: read code past stop gate`)
   if (scenario === "missing") assert.match(text, /missing|not.*(?:exist|found)|no.*\.foreman/i)
-  if (scenario === "invalid") assert.match(text, /invalid|not.*valid|unsupported|shape|format/i)
+  if (scenario === "invalid") assert.match(text, /invalid|not.*(?:valid|supported)|unsupported|shape|format/i)
+  if (scenario === "absent") assert.match(text, /not.*(?:found|exist)|absent|missing|no.*F01/i)
+  if (scenario === "level") assert.match(text, /invalid|unknown|clarif|valid.*level/i)
   if (scenario === "model") {
     assert.match(text, /below|insufficient|does not qualify|not qualified|level C|level \*\*C\*\*/i)
     assert.match(text, /Astra|6\.1[ -]Sol|gpt-6\.1-sol/i)

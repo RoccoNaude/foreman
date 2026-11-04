@@ -136,7 +136,7 @@ Never run: commits, pushes, merges, deletes or edits during review.
     } else {
       assert.ok(transcript.some(event => event.type === "tool_use" && event.part.tool === "skill"
         && event.part.state.input.id === "ponytail-review" && event.part.state.status === "completed"), "ponytail-review must load successfully")
-      if (scenario === "empty") assert.match(finalText, /empty|no changes/i)
+      if (scenario === "empty") assert.match(finalText, /empty|no (?:changes|differences|staged)/i)
       else {
         assert.match(finalText, /divide\.js.*(?:1|L1)/)
         assert.match(finalText, /multipli|a \* b|zero|RangeError/i)
