@@ -5,7 +5,7 @@
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
 ![Claude Code version](https://img.shields.io/badge/Claude_Code-0.3.0-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.0-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.1-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -134,6 +134,11 @@ any project, run:
 ```
 
 In OpenCode, use `/foreman/models` instead.
+
+**Zed / ACP (OpenCode 2.2.5):** use plain prompts `foreman models` and
+`foreman start-task <id> [notes]`, without a leading `/`. The ACP slash-command
+path can complete without displaying a response; see the
+[ACP workaround](.opencode/README.md#zed--acp-workaround).
 
 ## Installation
 

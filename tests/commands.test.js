@@ -9,16 +9,17 @@ async function commands() {
   const prompts = []
   const synthetic = []
   let context
+  let admission
   await foreman.setup({
     command: { transform: async callback => callback({ add: value => definitions.push(value) }) },
     agent: { transform: async () => {} },
     session: {
       prompt: async input => prompts.push(input),
       synthetic: async input => synthetic.push(input),
-      hook: async (kind, callback) => { context = callback },
+      hook: async (kind, callback) => { if (kind === "context") context = callback; else admission = callback },
     },
   })
-  return { definitions, prompts, synthetic, context }
+  return { definitions, prompts, synthetic, context, admission }
 }
 
 test("commands register repeatably and forward task notes, attachments and delivery without a model override", async () => {
@@ -32,6 +33,37 @@ test("commands register repeatably and forward task notes, attachments and deliv
   assert.ok(prompts[0].text.startsWith(`${prompt.text}\n\n`))
   assert.ok(prompts[0].text.includes(fileURLToPath(new URL("../shared/templates/settings.md", import.meta.url))))
   assert.ok(!/CLAUDE_PLUGIN_ROOT|\$SHARED|\$ARGUMENTS/.test(prompts[0].text))
+})
+
+test("ACP plain prompts share command instructions without changing other prompts or attachments", async () => {
+  const { definitions, prompts, admission } = await commands()
+  for (const args of ["F01", "7.8 keep $& and\nnotes", "issue #42 notes", "", "   "]) {
+    await definitions[0].execute({ sessionID: "s", prompt: { text: args }, delivery: "steer" })
+    const event = { prompt: { text: `foreman start-task ${args}` }, delivery: "queue" }
+    admission(event)
+    assert.equal(event.prompt.text, prompts.at(-1).text)
+    assert.equal(event.delivery, "queue")
+  }
+  const empty = { prompt: { text: "foreman start-task" } }
+  admission(empty)
+  assert.match(empty.prompt.text, /Ask me for a finding ID/)
+  assert.match(empty.prompt.text, /do not inspect project files or start a task/)
+  const event = { prompt: { text: "foreman models",
+    files: [{ uri: "file:///task.txt", mention: { start: 0, end: 7, text: "foreman" } }],
+    agents: [{ name: "build", mention: { start: 0, end: 7, text: "foreman" } }],
+    skills: [{ id: "example", mention: { start: 0, end: 7, text: "foreman" } }],
+  } }
+  await definitions[1].execute({ sessionID: "s", delivery: "steer" })
+  admission(event)
+  assert.equal(event.prompt.text, prompts.at(-1).text)
+  assert.deepEqual(event.prompt.files, [{ uri: "file:///task.txt" }])
+  assert.deepEqual(event.prompt.agents, [{ name: "build" }])
+  assert.deepEqual(event.prompt.skills, [{ id: "example" }])
+  for (const text of ["explain foreman models", "foreman models are useful", "foreman start-tasks", "/foreman/start-task 7.8"]) {
+    const event = { prompt: { text } }
+    admission(event)
+    assert.equal(event.prompt.text, text)
+  }
 })
 
 test("both model commands request only the models-per-level Markdown table", async () => {

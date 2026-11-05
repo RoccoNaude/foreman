@@ -43,6 +43,7 @@ model-clarification scenario, nor Claude Code live behavior.
 
 | Check | Method |
 |---|---|
+| ACP ordinary-prompt workaround: instruction expansion, task notes/issue references, empty input and streamed output before end_turn | Automated `acp.test.js`, real OpenCode 2.2.5 ACP with local mock provider; no tokens or Zed UI |
 | Actual npm tarball, byte-identical shared assets, global commands/reviewer in two projects, local configuration, no copied definitions | Automated `package.test.js` |
 | Installed source identity, checkout discovery separately, repeated unload/reload without duplicates | Automated `package.test.js` |
 | Strong reviewer under cheaper parent, missing-model failure before dispatch, real permission evaluator | Automated installed-server `runtime-probe.js` |
@@ -101,6 +102,28 @@ interactive permission dialogs. Hard reviewer denials are tested separately.
 Baseline: OpenCode **2.2.5**. Newer versions are not verified. See the task's
 recorded run results for executed checks; the coverage table describes what
 the scripts assert, not a claim that every run passes.
+
+## Issue #19 ACP reproduction
+
+The owner confirmed both slash commands work in the OpenCode TUI but produce
+no visible response in Zed ACP, including a fully typed task command. An isolated
+2.2.5 ACP probe reproduced missing output for foreman and a minimal plugin
+command, while an ordinary prompt streamed a mock answer. Adding `session.wait`
+to the command callbacks did not restore ACP output and was discarded.
+
+The workaround uses ordinary `foreman models` / `foreman start-task ...` prompts,
+expanded by a prompt-admission hook. `acp.test.js` checks their actual outgoing
+model input and received ACP output; unit tests check identical slash/plain
+instructions, attachment retention, metadata removal and unrelated prompts.
+It does not claim that ACP slash commands, the Zed picker, real-model task
+behaviour, or Claude Code live acceptance have been fixed or newly verified.
+
+Verification on 2.2.5: `npm test` passed all 13 tests, including installed-artifact
+checks and ACP mock-provider transport. Independent skill-first review approved
+the uncommitted change and also passed all 13 tests. `git diff --check` passed.
+The first baseline suite run in a worktree nested under the original checkout
+failed checkout-discovery path expectations; moving the worktree outside that
+ancestor fixed isolation without a product/test-code change for that failure.
 
 ## Issue #16 acceptance status
 

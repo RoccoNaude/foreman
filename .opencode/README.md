@@ -29,6 +29,35 @@ issue-only work. Review uses the supplied issue snapshot; completion is local,
 not a GitHub comment/edit/closure. Remote writes need separate approval.
 See [shared issue rules](../shared/github-issues.md) for the full policy.
 
+## Zed / ACP workaround
+
+On OpenCode 2.2.5, slash commands submitted through ACP can finish without
+forwarding generated output, even when the full command and ID are typed.
+Its ACP command advertisements also omit input hints, so Zed may submit a
+selected command before you can enter arguments. The TUI slash commands work
+normally; these are separate client paths.
+
+With foreman 0.2.1 or later, type an **ordinary message**, without a leading `/`:
+
+```text
+foreman models
+foreman start-task 7.8
+foreman start-task F01 Focus on the import failure
+foreman start-task issue #42 Optional notes
+```
+
+These prompts expand to the same installed instructions as the slash commands;
+model checks and plan/commit/merge approvals are unchanged. `foreman start-task`
+without a reference asks for one before inspecting project files. Attachments
+are retained; their original text-position metadata is removed after expansion.
+These exact plain-prompt prefixes are reserved when the plugin is enabled.
+
+This is a foreman-only compatibility path, not a fix to OpenCode or Zed. It does
+not change Zed's slash picker. Automated ACP checks use a local mock model and
+prove instruction expansion and output delivery, not real-model judgement or
+Zed UI behavior. After updating foreman, open a new Zed agent thread so its ACP
+process loads the updated plugin.
+
 ## Global Git and project-local installation
 
 OpenCode supports npm-compatible Git specifications without an npm release:
@@ -85,7 +114,7 @@ To disable it in a checkout, configure `"plugins": ["-foreman"]` in
 Install the tarball into a directory you choose:
 
 ```sh
-npm install --prefix /absolute/path/to/foreman-install --ignore-scripts --no-audit --no-fund /path/to/opencode-foreman-0.2.0.tgz
+npm install --prefix /absolute/path/to/foreman-install --ignore-scripts --no-audit --no-fund /path/to/opencode-foreman-0.2.1.tgz
 ```
 
 Then configure the installed **directory**, not the tarball, in either your global

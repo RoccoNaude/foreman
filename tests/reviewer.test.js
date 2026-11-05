@@ -38,7 +38,7 @@ test("dispatch guard blocks fallback models and variants, not other agents", asy
     command: { transform: async () => {} },
     skill: { list: async () => ({ data: [] }) },
     agent: { transform: async () => {} },
-    session: { hook: async (kind, callback) => { assert.equal(kind, "context"); guard = callback } },
+    session: { hook: async (kind, callback) => { if (kind === "context") guard = callback } },
   })
   const model = { providerID: "openai", id: "gpt-6.1-sol", variant: "high" }
   const event = { agent: "foreman-reviewer", model, system: [] }
