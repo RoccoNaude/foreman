@@ -118,6 +118,10 @@ instructions, attachment retention, metadata removal and unrelated prompts.
 It does not claim that ACP slash commands, the Zed picker, real-model task
 behaviour, or Claude Code live acceptance have been fixed or newly verified.
 
+Owner-reported manual verification: both TUI slash commands still work; both
+ordinary-message alternatives work in Zed; Zed slash commands still fail.
+This confirms the workaround at command level, not full task-workflow acceptance.
+
 Verification on 2.2.5: `npm test` passed all 13 tests, including installed-artifact
 checks and ACP mock-provider transport. Independent skill-first review approved
 the uncommitted change and also passed all 13 tests. `git diff --check` passed.

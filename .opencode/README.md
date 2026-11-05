@@ -55,8 +55,11 @@ These exact plain-prompt prefixes are reserved when the plugin is enabled.
 This is a foreman-only compatibility path, not a fix to OpenCode or Zed. It does
 not change Zed's slash picker. Automated ACP checks use a local mock model and
 prove instruction expansion and output delivery, not real-model judgement or
-Zed UI behavior. After updating foreman, open a new Zed agent thread so its ACP
-process loads the updated plugin.
+Zed UI behavior. The owner independently confirmed that both plain prompts work
+in Zed, both slash commands still work in the OpenCode TUI, and Zed slash
+commands still fail. This is command-level confirmation, not a claim of full
+end-to-end task-workflow acceptance. After updating foreman, open a new Zed agent
+thread so its ACP process loads the updated plugin.
 
 ## Global Git and project-local installation
 

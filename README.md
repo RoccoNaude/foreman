@@ -51,6 +51,13 @@ task (`5.2`), or `issue <number|#number|URL>` through eight steps. The amber ste
 /foreman/start-task issue https://github.com/owner/repo/issues/42
 ```
 
+> **OpenCode usage note:** if slash commands submit immediately or produce no
+> response in Zed / ACP, type an ordinary message **without a leading `/`**:
+> `foreman start-task 7.8` or `foreman models` (requires foreman 0.2.1+).
+> Both plain prompts have been confirmed working in Zed; OpenCode TUI slash
+> commands continue to work normally. See the [ACP workaround](.opencode/README.md#zed--acp-workaround)
+> for task references, optional notes and limitations.
+
 Numbers use the checkout's GitHub repository; URLs identify it explicitly.
 Ambiguous repositories and cross-repository work need clarification. Issue
 access requires an available GitHub connector or authenticated `gh` (only for
@@ -135,10 +142,8 @@ any project, run:
 
 In OpenCode, use `/foreman/models` instead.
 
-**Zed / ACP (OpenCode 2.2.5):** use plain prompts `foreman models` and
-`foreman start-task <id> [notes]`, without a leading `/`. The ACP slash-command
-path can complete without displaying a response; see the
-[ACP workaround](.opencode/README.md#zed--acp-workaround).
+For Zed / ACP, use `foreman models` without `/`; see the
+[usage note above](#how-it-works).
 
 ## Installation
 
