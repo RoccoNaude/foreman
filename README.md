@@ -5,7 +5,7 @@
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
 ![Claude Code version](https://img.shields.io/badge/Claude_Code-0.3.0-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.0-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.1-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -50,6 +50,13 @@ task (`5.2`), or `issue <number|#number|URL>` through eight steps. The amber ste
 /foreman:start-task issue #42 Focus on the import failure
 /foreman/start-task issue https://github.com/owner/repo/issues/42
 ```
+
+> **OpenCode usage note:** if slash commands submit immediately or produce no
+> response in Zed / ACP, type an ordinary message **without a leading `/`**:
+> `foreman start-task 7.8` or `foreman models` (requires foreman 0.2.1+).
+> Both plain prompts have been confirmed working in Zed; OpenCode TUI slash
+> commands continue to work normally. See the [ACP workaround](.opencode/README.md#zed--acp-workaround)
+> for task references, optional notes and limitations.
 
 Numbers use the checkout's GitHub repository; URLs identify it explicitly.
 Ambiguous repositories and cross-repository work need clarification. Issue
@@ -134,6 +141,9 @@ any project, run:
 ```
 
 In OpenCode, use `/foreman/models` instead.
+
+For Zed / ACP, use `foreman models` without `/`; see the
+[usage note above](#how-it-works).
 
 ## Installation
 
