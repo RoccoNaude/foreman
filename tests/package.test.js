@@ -47,6 +47,7 @@ test("artifact contains unchanged shared sources and only intended runtime files
   assert.ok(files.includes(".opencode/plugins/reviewer.md"))
   assert.ok(files.includes(".opencode/plugins/start-task.md"))
   assert.ok(files.includes(".opencode/plugins/index.js"))
+  assert.ok(!files.includes(".foreman.md"), "maintainer settings must not ship in the npm package")
   assert.ok(!files.some(path => /^(claude-code|\.claude-plugin|\.tmp|tests)\//.test(path)))
   assert.deepEqual(readdirSync(join(sandbox, "node_modules")), [".package-lock.json", "opencode-foreman"])
 })

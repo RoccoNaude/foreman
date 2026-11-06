@@ -5,9 +5,10 @@ const reviewerModel = { providerID: "openai", id: "gpt-6.1-sol", variant: "high"
 const shared = fileURLToPath(new URL("../../shared", import.meta.url))
 const system = readFileSync(new URL("./reviewer.md", import.meta.url), "utf8")
   .replaceAll("$SHARED", shared)
+const models = readFileSync(new URL("../../shared/model-levels.md", import.meta.url), "utf8")
 const startTask = readFileSync(new URL("./start-task.md", import.meta.url), "utf8")
   .replaceAll("$SHARED", shared)
-const models = readFileSync(new URL("../../shared/model-levels.md", import.meta.url), "utf8")
+  .replaceAll("$MODELS", () => models)
 const modelsPrompt = `Output only the Markdown table under **Models per level** in the document below, preserving its headers and cell contents exactly, including model IDs and trial restrictions. Render it as a table, not a code block. Omit headings, dates, surrounding prose and all other sections.\n\n${models}`
 const taskPrompt = text => text.trim() ? `${text}\n\n${startTask}`
   : "No task reference was supplied. Ask me for a finding ID (e.g. F01), plan task ID (e.g. 7.8), or issue reference (e.g. issue 42), and optional notes. Stop; do not inspect project files or start a task."

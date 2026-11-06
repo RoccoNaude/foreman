@@ -82,6 +82,21 @@ test("both model commands request only the models-per-level Markdown table", asy
   assert.equal(prompts[0].delivery, "steer")
 })
 
+test("both start-task entry points embed the canonical model document without an external read", async () => {
+  const { definitions, prompts, admission } = await commands()
+  const models = readFileSync(new URL("../shared/model-levels.md", import.meta.url), "utf8")
+  await definitions[0].execute({ sessionID: "s", prompt: { text: "7.8" }, delivery: "steer" })
+  const event = { prompt: { text: "foreman start-task 7.8" } }
+  admission(event)
+  for (const text of [prompts[0].text, event.prompt.text]) {
+    assert.ok(text.includes(`## Shared model document\n\n${models}`))
+    assert.match(text, /use it without\s+rereading its installed file/)
+    assert.match(text, /Use the supplied shared model table/)
+    assert.ok(!text.includes(fileURLToPath(new URL("../shared/model-levels.md", import.meta.url))))
+    assert.ok(!text.includes("$MODELS"))
+  }
+})
+
 test("issue references and notes reach the shared policy unchanged; local inputs still work", async () => {
   const { definitions, prompts } = await commands()
   const policy = fileURLToPath(new URL("../shared/github-issues.md", import.meta.url))

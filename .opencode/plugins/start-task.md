@@ -7,7 +7,8 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
    the project's files, checks, protected data and rules. If it is
    missing, stop and tell me to copy
    `$SHARED/templates/settings.md` there and fill it in.
-   The model table is `$SHARED/model-levels.md`.
+   The complete shared model document is supplied below; use it without
+   rereading its installed file (which may be outside the project).
    - An ID like `F01` is a finding in the settings' **Tracker**; an ID
       like `5.2` is a task in the settings' **Plan**. `issue` uses the
       shared GitHub rules instead; Tracker and Plan may both be `None`.
@@ -28,7 +29,7 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
      is X.
    - A task that matches a case in the settings' **Level A also
      covers** is level A, whatever its entry says; tell me.
-   - Read the shared model table and compare the level with the actual
+   - Use the supplied shared model table and compare the level with the actual
      provider/model/variant supplied in the request's system context.
      If that identity is unavailable, stop; never infer it from the
      configured default. Recheck before reading code if the model changes.
@@ -86,4 +87,8 @@ Follow this workflow in order. Task notes do not waive its checks or approvals.
     message (`F01: <what changed>`, `Plan 5.2: <what changed>` or
     `Issue #42: <what changed>`; no automatic-closing text). Ask
    before committing, then ask separately before merging into the main
-   branch and deleting the task branch. Never push.
+    branch and deleting the task branch. Never push.
+
+## Shared model document
+
+$MODELS

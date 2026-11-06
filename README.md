@@ -5,7 +5,7 @@
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
 ![Claude Code version](https://img.shields.io/badge/Claude_Code-0.3.0-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.1-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.2-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
@@ -275,6 +275,8 @@ For Zed / ACP, use `foreman models` without `/`; see the
 1. **Add the settings.** Copy
    [`shared/templates/settings.md`](shared/templates/settings.md) to
    `.foreman.md` at your repository root and fill it in.
+   This repository's own `.foreman.md` is for Foreman maintainers only; do not
+   copy it as your project settings. Use the template above instead.
 2. **Choose a task source:** add a tracker, a plan or both from
    [`shared/templates/`](shared/templates/), or use GitHub issues. For
    issue-only work, Tracker and Plan can both be `None` in `.foreman.md`.
@@ -360,6 +362,7 @@ foreman/
 ├── tests/                Package/runtime checks and acceptance guide
 ├── package.json          OpenCode package metadata (private) and test command
 ├── AGENTS.md             Repository contributor instructions
+├── .foreman.md           Maintainer-only settings, not the user template
 ├── README.md             This guide
 └── LICENSE               MIT Licence
 ```
