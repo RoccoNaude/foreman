@@ -47,19 +47,6 @@ gets its Model line when it is added.
   findings to the matching list under **Open findings**, each with a
   **Source** line.
 
-## Implemented
-
-Fixes made from this tracker, newest first.
-
-| ID | Date | What changed | Guarded by |
-|---|---|---|---|
-
-## Audit log
-
-| Date | Scope | Load assumed | Result |
-|---|---|---|---|
-| <date> | <whole repo, N lines, N tests passing> | <expected load> | <N findings (F01 to Fnn)> |
-
 ## Open findings
 
 Fix order: <which first, and why>.
@@ -80,6 +67,23 @@ Fix order: <which first, and why>.
 ### Should fix
 
 ### Nice to have
+
+## Implemented
+
+Fixes made from this tracker, newest first.
+
+| ID | Date | What changed | Guarded by |
+|---|---|---|---|
+
+## Audit log
+
+| Date | Scope | Load assumed | Result |
+|---|---|---|---|
+| <date> | <whole repo, N lines, N tests passing> | <expected load> | <N findings (F01 to Fnn)> |
+
+## Already in place
+
+- <what the audit found already done right, so it is not raised again>
 
 ## Not checked in the audit of <date>
 
