@@ -4,8 +4,8 @@
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](https://claude.com/claude-code)
-![Claude Code version](https://img.shields.io/badge/Claude_Code-0.3.0-lightgrey.svg)
-![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.2-lightgrey.svg)
+![Claude Code version](https://img.shields.io/badge/Claude_Code-0.3.1-lightgrey.svg)
+![OpenCode package version](https://img.shields.io/badge/OpenCode-0.2.3-lightgrey.svg)
 
 foreman is a small, opinionated workflow for building software with AI
 coding agents. Like a foreman on site, it gives each job to a worker of
