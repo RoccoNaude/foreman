@@ -17,9 +17,12 @@ settings and checks are still required; issues are not copied into local files.
 - **Tracker:** `docs/planning/code-audit.md` (findings `F01`, ...;
   template `shared/templates/code-audit.md`), or `None`
 - **Plan:** `docs/planning/implementation-plan.md` (tasks `5.2`, ...;
-  template `shared/templates/implementation-plan.md`), or `None`
+  template `shared/templates/implementation-plan.md`; name any
+  companion file or editing guide to read before writing to it), or `None`
 - **Workflow ADR:** `docs/adr/<NNNN>-ai-assisted-development-workflow.md`,
   or `None`
+- **Trial task:** `<task ID>` (the only task a "trial only" model in
+  foreman's model table may start), or `None`
 - **Notes file:** `<path>` (project status; foreman says what to change
   there but never edits it), or `None`
 - **Scratch folder:** `.tmp/`
@@ -58,9 +61,11 @@ Commands and scripts the reviewer must never run:
 ## Level A also covers
 
 Project cases that make a task level A (added to the general list in
-foreman's `shared/model-levels.md`):
+foreman's `shared/model-levels.md`), and any close cases that are not.
+Do not repeat the general cases.
 
-- <e.g. Writes to `data/raw/`, calls to the production API.>
+- <e.g. Writes to `data/raw/`. Code that only reads `data/raw/` is not
+  level A for that alone.>
 
 ## Impact to state
 

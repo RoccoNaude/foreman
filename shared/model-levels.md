@@ -30,8 +30,12 @@ adds its own level A cases in its settings file (`.foreman.md`, section
   to production or outside systems, money, date or aging logic, changes
   across several modules, or anything needing judgement; plus the
   project's own cases in its settings.
-- **B (strong):** one function, with the change and its test already
-  spelled out in the task.
+  Money, date or aging logic means code that computes or changes
+  amounts, dates or aging buckets behind a reported figure or a
+  forecast. Labels, statuses, columns and layout over unchanged totals
+  are not level A for that alone.
+- **B (strong):** changes within one script or module, with the
+  change and its test already spelled out in the task.
 - **C (mechanical):** deleting or moving code, checked by the full test
   suite.
 - **Human:** a decision from someone outside the code comes first; the
@@ -40,29 +44,40 @@ adds its own level A cases in its settings file (`.foreman.md`, section
 - **If a task matches more than one level, the highest wins.** E.g. a
   one-line fix that changes what is written to protected data is
   level A.
-- **"Trial only"** models may start only the task named for their trial.
+- **"Trial only"** models may start only the settings' **Trial task**.
 
 ## Models per level
 
-Last checked: 1 November 2026
+Last checked: 12 November 2026
 
 | Level | Anthropic (Claude Code) | OpenAI | Local (llama.cpp) |
 |---|---|---|---|
-| A | Opus 5.5 (`claude-opus-5-5`) | GPT-6 Astra, GPT-6.1 Sol | none |
+| A | Opus 5.5 (`claude-opus-5-5`); Fable 5.2 (`claude-fable-5-2`), see "Level A model" | GPT-6 Astra, GPT-6.1 Sol | none |
 | B | Sonnet 5.5 (`claude-sonnet-5-5`) | GPT-6.1 Terra, GPT-6 Sol | none |
 | C | Haiku 5.5 (`claude-haiku-5-5`) | GPT-6 Luna | Qwen3.8-27B:THINKING (Q3), trial only |
 
+- **Level A model:** Opus 5.5 by default. Use Fable 5.2 only for a
+  level A task the owner names as hard, or after `/foreman:start-task`
+  hands a task back because a second review still has a Must fix
+  finding. Fable 5.2 uses about twice the allowance of Opus 5.5, and on
+  Pro and Team standard seats it runs on usage credits.
 - **Not placed** (strength relative to the levels not known; place once
-  checked): Fable 5.1, Fable 5; GPT-5.6 Cyber; all "Fast" and
-  "Ultrafast" variants; Qwen3.8-27B:INSTRUCT, Qwen3.6-27B, Gemma-4-12B,
-  Gemma-4-26B-A4B.
-- **Not used** (superseded by the models above): Opus 5, 4.8, 4.7, 4.6;
-  Sonnet 5, 4.6; Haiku 4.5; the older GPT-5.6 Sol, Terra and Luna.
-- **Sources:** Anthropic models from the Claude Code model picker. OpenAI
-  placement from third-party comparisons (TrueFoundry, Lindy, LiteLLM,
-  Respan; 1 November 2026), which disagree on names and scores; not
-  checked against OpenAI's own documentation. Local models:
-  vendor-reported scores only, and Q3 quantisation lowers quality.
+  checked): GPT-5.6 Cyber; all "Fast" and "Ultrafast" variants;
+  Qwen3.8-27B:INSTRUCT, Qwen3.6-27B, Gemma-4-12B, Gemma-4-26B-A4B.
+- **Not used** (superseded by the models above): Fable 5.1 and Fable 5
+  (weaker than Opus 5.5 and dearer than Fable 5.2); Opus 5, 4.8, 4.7,
+  4.6; Sonnet 5, 4.6; Haiku 4.5; the older GPT-5.6 Sol, Terra and Luna.
+- **Sources:** Anthropic models from the Claude Code model picker.
+  Anthropic placement (12 November 2026) from Anthropic's launch
+  tables and pricing, Snorkel's coding benchmark, Cognition's
+  FrontierCode 2.0 results and Tech Insider's Opus, Sonnet and Haiku
+  5.5 comparison; mostly vendor-reported. Usage cost per model
+  inferred from API prices; Anthropic does not publish subscription
+  rates. OpenAI placement from third-party comparisons (TrueFoundry,
+  Lindy, LiteLLM, Respan; 1 November 2026), which disagree on names
+  and scores; not checked against OpenAI's own documentation. Local
+  models: vendor-reported scores only, and Q3 quantisation lowers
+  quality.
 
 ## Reviewer
 
@@ -74,6 +89,10 @@ model implemented it (cheap implementer, strong reviewer):
 | Claude Code | `foreman:reviewer` (`claude-code/agents/reviewer.md`) | `claude-opus-5-5` | `medium`; `high` for level A tasks. Both set on the Agent call by `/foreman:start-task` (see Known behaviour). |
 | OpenCode V2 | `foreman-reviewer` (`.opencode/plugins/reviewer.md`) | `openai/gpt-6.1-sol` | pinned `high` variant in `reviewerModel` (`.opencode/plugins/foreman.mjs`); never inherit the implementer's model |
 | Hermes Agent | planned, not built | a level A model from this table | to set |
+
+The reviewer stays on Opus 5.5 even though Fable 5.2 is stronger: it
+must be available on every merge, and Fable 5.2 needs usage credits on
+some seats (checked 12 November 2026).
 
 ## Known behaviour (Claude Code)
 
