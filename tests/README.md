@@ -39,8 +39,8 @@ and remote inspection; no GitHub write is authorized. Every attempted shell
 command is checked against the guard, including attempts it blocked. Because
 command text cannot predict shell expansion, a `gh` wrapper on `PATH` also checks
 the actual arguments (after expansion) and runs the real `gh` only for exact reads
-of the two selected issues; every call is logged and asserted. The guard and all transcripts are test artifacts, not product
-security controls.
+of the two selected issues; every call is logged and asserted. The guard and
+all transcripts are test artifacts, not product security controls.
 
 `live-commands.js --issue-cases` uses a synthetic `gh` and no GitHub access. Each
 case must stop before source inspection, stay on `main`, give a matching reason
@@ -59,8 +59,9 @@ claude-opus-5-5 --effort medium` and `--resume` per turn, against a synthetic
 issue with **no** `Model:` line: start-task must ask for the level, the test
 user answers A, then approves plan, commit and merge in separate turns. It
 asserts no edits before plan approval, no commit or merge without its approval,
-one `foreman:reviewer` call on Opus 5.5 (effort `high`, or a disclosed unset effort; see #27) whose prompt includes
-the issue URL, title, body, level and clarification, a `Merge: yes` verdict,
+one `foreman:reviewer` call on Opus 5.5 (effort `high`, or a disclosed unset
+effort; see #27) whose prompt includes the issue URL, title, body, level and
+clarification, a `Merge: yes` verdict,
 issue reads only, no push or GitHub write attempts (PreToolUse guard) and no
 automatic-closing text. Usage counts against the owner's Claude subscription.
 
@@ -229,8 +230,13 @@ issue is not a pull request) silently blocked by the old guard; such read-only
 GETs are now allowed. A second and third review found that text-guard patches
 for `gh api` could be bypassed with attached or combined short flags and shell
 brace expansion (e.g. `{-XPATCH,-fstate=closed}`); after handback the owner
-chose the argument-level `gh` wrapper above. All recorded passing runs satisfy the tightened checks
-on replay; they were not rerun live.
+chose the argument-level `gh` wrapper above. All recorded passing runs satisfy
+the tightened checks on replay. After the final review, `--issues` was rerun
+live on the final harness: `.tmp/live-commands-TOjYvt/` passed all four cases.
+The wrapper logged every real `gh` call, passed a `gh api … --jq` read through
+to the real `gh` and blocked nothing; no GitHub write occurred. `--issue-cases`,
+`live-workflow.js --issue` and `live-claude.js` were not rerun after the
+follow-up fixes.
 
 Limits: the Claude Code run uses a synthetic `gh`; real GitHub reads are covered
 by the OpenCode `--issues` run only. Claude Code stop-gate cases beyond the
