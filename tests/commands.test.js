@@ -147,7 +147,7 @@ test("shared issue instructions cover input, access, model and remote-write boun
   }
 })
 
-test("every dispatch supplies the actual model, including changes and variants", async () => {
+test("ordinary dispatch reports only model identity, including changes and variants", async () => {
   const { context } = await commands()
   for (const model of [
     { providerID: "openai", id: "gpt-6-luna" },
@@ -155,8 +155,10 @@ test("every dispatch supplies the actual model, including changes and variants",
   ]) {
     const event = { agent: "build", model, system: [] }
     await context(event)
-    assert.ok(event.system[0].text.includes(`${model.providerID}/${model.id}${model.variant ? `#${model.variant}` : ""}`))
-    assert.match(event.system[0].text, /Recheck if it changes; never silently switch/)
+    assert.deepEqual(event.system, [{
+      type: "text",
+      text: `Actual session model for this request: ${model.providerID}/${model.id}${model.variant ? `#${model.variant}` : ""}.`,
+    }])
     assert.deepEqual(event.model, model)
   }
 })
@@ -169,7 +171,9 @@ test("workflow retains stop conditions, approval gates and second-review handbac
     "If it is\n   missing, stop", "Any other shape", "None", "absent entry",
     "before reading any code", "stop and ask me for\n     a level (do not estimate)",
     "Human (then X)", "Needs decision", "Level A also", "below the level, not placed",
-    '"trial only" for a different task, stop', "Fast/Ultrafast", "over 31 days old",
+     '"trial only" for a different task, stop', "Fast/Ultrafast", "over 31 days old",
+     "provider/model/variant supplied in the request's system context",
+     "Recheck before reading code if the model changes", "Do not pin or switch",
     "approve before writing code", "must be clean", "Ask first", "Protected data",
     "Run every command", 'agent: "foreman-reviewer"', "openai/gpt-6.1-sol#high",
     "ponytail-review", "second review still", "stop and hand it to me", "Do not start a third review",

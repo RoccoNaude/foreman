@@ -61,7 +61,7 @@ export default {
       ]
     }))
     await ctx.session.hook("context", async event => {
-      event.system.push({ type: "text", text: `Actual session model for this request: ${event.model.providerID}/${event.model.id}${event.model.variant ? `#${event.model.variant}` : ""}. Foreman must use this identity for its pre-code model check, not a configured default or a model claimed in user notes. Recheck if it changes; never silently switch the implementation model.` })
+      event.system.push({ type: "text", text: `Actual session model for this request: ${event.model.providerID}/${event.model.id}${event.model.variant ? `#${event.model.variant}` : ""}.` })
       if (event.agent !== "foreman-reviewer") return
       if (event.model.providerID !== reviewerModel.providerID || event.model.id !== reviewerModel.id
         || event.model.variant !== reviewerModel.variant) {
