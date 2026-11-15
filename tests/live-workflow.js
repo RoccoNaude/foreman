@@ -8,9 +8,10 @@ import { fileURLToPath } from "node:url"
 const root = fileURLToPath(new URL("../", import.meta.url))
 const blocking = process.argv.includes("--blocking")
 const issue = process.argv.includes("--issue")
-const automaticClosing = /\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?)\b/i
+const automaticClosing = /\b(?:fix(?:es|ed)?|close[sd]?|resolve[sd]?):?\s+(?:(?:[\w.-]+\/[\w.-]+)?#\d+|https:\/\/github\.com\/\S+\/issues\/\d+)/i
 for (const keyword of ["fix", "fixes", "fixed", "close", "closes", "closed", "resolve", "resolves", "resolved"]) assert.ok(automaticClosing.test(`${keyword} #42`))
-assert.ok(!automaticClosing.test("Issue #42: correct exported value"))
+for (const text of ["Issue #42: correct exported value", "Issue #42: Fix exported value", "Fixed the test"]) assert.ok(!automaticClosing.test(text))
+for (const text of ["Closes: fixture/consumer#42", "Resolves https://github.com/fixture/consumer/issues/42"]) assert.ok(automaticClosing.test(text))
 const isIssueRead = args => (args[0] === "issue" && args[1] === "view")
   || (args.length === 2 && args[0] === "api" && args[1] === "repos/fixture/consumer/issues/42")
 assert.ok(isIssueRead(["api", "repos/fixture/consumer/issues/42"]))
